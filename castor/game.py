@@ -1,6 +1,9 @@
 # Das Backend für Castor
 # → Das grundlegende Kartenspiel
 
+from random import shuffle
+
+
 class Karte:
     def __init__(self,
                  suit: int | None,
@@ -69,17 +72,21 @@ class Karte:
 
 
 class Deck:
-    def __init__(self, empty: bool = False):
+    def __init__(self, empty: bool = False, shuffled: bool = True):
         """
         Ein Kartendeck.
 
         :param empty: Gibt an, ob das Kartendeck beim Erstellen leer bleiben soll.
+        :param shuffled: Gibt an, ob das Kartendeck nach dem Erstellen gemischt werden soll.
         """
         self.cards: list[Karte, ...] = []
 
         # Füge alle Karten zu dem Deck hinzu
         if not empty:
             self.new_deck()
+        # Mische das Deck
+        if shuffled and not empty:
+            self.shuffle()
 
     def __repr__(self) -> str:
         """
@@ -105,3 +112,7 @@ class Deck:
             self.cards = []
         self.cards += [Karte(suit=suit, value=value) for suit in range(4) for value in range(13)]
         self.cards += [Karte(suit=None, value=50), Karte(suit=None, value=50)]
+
+    def shuffle(self) -> None:
+        """Mischt das Kartendeck."""
+        shuffle(self.cards)
