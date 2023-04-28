@@ -2,9 +2,9 @@
 
 ## Aufteilung
 
-* Popa: Backend
-* Silencio: Networking stuff
-* Spieler5405 & Cidentia: Designs, Animationen und der ganze Scheiss
+* **Popa:** Backend
+* **Silencio:** Networking stuff
+* **Spieler5405 & Cidentia:** Designs, Animationen und der ganze Scheiss
 
 ## Links:
 
