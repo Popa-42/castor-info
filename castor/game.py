@@ -45,7 +45,7 @@ class Karte:
             return "Herz"
         if self.suit == 3:
             return "Karo"
-        if self.suit is None:
+        if not self.suit:
             return ""
         raise IndexError("Diese Farbe existiert nicht.")
 
@@ -72,7 +72,9 @@ class Karte:
 
 
 class Deck:
-    def __init__(self, empty: bool = False, shuffled: bool = True):
+    def __init__(self,
+                 empty: bool = False,
+                 shuffled: bool = False):
         """
         Ein Kartendeck.
 
@@ -116,3 +118,80 @@ class Deck:
     def shuffle(self) -> None:
         """Mischt das Kartendeck."""
         shuffle(self.cards)
+
+    def deal(self) -> Karte | None:
+        """Entfernt die oberste Karte vom Stapel und returnt sie"""
+        if self.cards:
+            return self.cards.pop(0)
+        return
+
+    def add_card_at_top(self, karte: Karte):
+        """Lege eine Karte oben auf das Deck"""
+        self.cards.insert(0, karte)
+
+    def add_card_at_bottom(self, karte: Karte):
+        """Lege eine Karte unter das Deck"""
+        self.cards.append(karte)
+
+
+class Player:
+    def __init__(self,
+                 playerno: int,
+                 name: str = "",
+                 hand: list[Karte, ...] = None):
+        """
+        Ein Spieler.
+
+        :param playerno: Die Nummer des Spielers
+        :param name: Der Name des Spielers
+        :param hand: Die Hand des Spielers
+        """
+        # Nummer (ID) des Spielers
+        self.number = playerno
+        # Name des Spielers
+        if not name:
+            name = f"Spieler {self.number}"
+        self.name = name
+        # Hand des Spielers
+        if not hand:
+            hand = []
+        self.hand = hand
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(number={self.number}, name="{self.name}", hand={self.hand})'
+
+    def take_card(self, karte: Karte):
+        """Fügt eine Karte zur Hand des Spielers hinzu"""
+        self.hand.append(karte)
+
+    def play_card_at_index(self, index: int) -> Karte | None:
+        """Entfernt die Karte aus der Hand des Spielers am gegebenen Index und returnt sie"""
+        if 0 <= index <= len(self.hand) - 1:
+            return self.hand.pop(index)
+        return
+
+
+class Game:
+    def __init__(self,
+                 players: int = 4,
+                 anfangskarten: int = 4):
+        """
+        Initialisiere das Spiel Castor.
+
+        :param players: Die Anzahl an Spielern
+        :param anfangskarten: Die Anzahl an Karten, die jeder Spieler zu Beginn bekommt.
+        """
+        # Erstelle ein Kartendeck
+        self.deck = Deck(empty=False, shuffled=True)
+        # Erstelle einen Nachziehstapel
+        self.stapel = Deck(empty=True)
+        # Erstelle die Spieler
+        self.spieler = [Player(playerno=i+1) for i in range(players)]
+        # Beginne mit x Karten pro Spieler
+        self.anfangskarten = anfangskarten
+
+    def deal_cards_to_all(self):
+        """Gibt jedem Spieler zu Beginn des Spiels seine Karten"""
+        for s in self.spieler:
+            for _ in range(self.anfangskarten):
+                s.take_card(self.deck.deal())
