@@ -30,7 +30,7 @@ bei der Installation angeben!)
 Wenn alles installiert ist, muss das Modul Pyglet installiert werden. Dazu ein Terminal
 öffnen (`Win` + `R` und dann `cmd` eingeben) und den folgenden Command eingeben:
 
-    pip -m install pyglet --user
+    python -m pip install pyglet --user
 
 Und fertig! Wenn alles geklappt hat, ist das Modul Pyglet jetzt verfügbar.
 
