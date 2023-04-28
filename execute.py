@@ -5,9 +5,9 @@ if __name__ == '__main__':
     # Das hier drunter wird nur dann beachtet, wenn die Datei selber ausgeführt wird.
     # Wenn man diese Datei importiert und dann versucht auszuführen, passiert nichts.
 
-    # Erstelle ein Pik-Ass
-    karte = Karte(1, 1)
-    print(karte)
-
-    deck = Deck()
-    print(deck)
+    game = Game()
+    print(game.spieler)
+    print(game.deck)
+    game.deal_cards_to_all()
+    print(game.spieler)
+    print(game.deck)

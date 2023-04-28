@@ -38,4 +38,4 @@ Und fertig! Wenn alles geklappt hat, ist das Modul Pyglet jetzt verfügbar.
 
 ## Links:
 
-* [Pyglet](https://pyglet.org/) ([Documentation](https://pyglet.org/))
+* [Pyglet](https://pyglet.org/) ([Documentation](https://pyglet.readthedocs.io/en/latest/))
