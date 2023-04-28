@@ -1,5 +1,11 @@
 # Castor
 
+## Aufteilung
+
+* Popa: Backend
+* Silencio: Networking stuff
+* Spieler5405 & Cidentia: Designs, Animationen und der ganze Scheiss
+
 ## Links:
 
 * [Pyglet](https://pyglet.org/)
