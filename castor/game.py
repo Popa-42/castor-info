@@ -4,7 +4,7 @@
 from random import shuffle
 
 
-class Karte:
+class Card:
     def __init__(self,
                  suit: int | None,
                  value: int):
@@ -21,7 +21,7 @@ class Karte:
         """
         Was bei ``str(Karte)`` bzw ``print(Karte)`` zurückgegeben wird, z.B.:
 
-        >>> karte = Karte(suit=1, value=1)
+        >>> karte = Card(suit=1, value=1)
         >>> print(karte)
         'Karte(suit=1, value=1)'
 
@@ -76,12 +76,12 @@ class Deck:
                  empty: bool = False,
                  shuffled: bool = False):
         """
-        Ein Kartendeck.
+        Ein Kartendeck. Enthält eine Liste mit Objekten der Klasse :class:`Card`.
 
         :param empty: Gibt an, ob das Kartendeck beim Erstellen leer bleiben soll.
         :param shuffled: Gibt an, ob das Kartendeck nach dem Erstellen gemischt werden soll.
         """
-        self.cards: list[Karte, ...] = []
+        self.cards: list[Card, ...] = []
 
         # Füge alle Karten zu dem Deck hinzu
         if not empty:
@@ -96,7 +96,7 @@ class Deck:
 
         >>> deck = Deck()
         >>> print(deck)
-        'Deck(cards=[Karte(suit=0, value=0), ...])'
+        'Deck(cards=[Card(suit=0, value=0), ...])'
 
         :param self: Bezieht sich auf die Instanz der Klasse
         :return: Eine String-Repräsentation des Objekts
@@ -112,24 +112,24 @@ class Deck:
         """
         if clear:
             self.cards = []
-        self.cards += [Karte(suit=suit, value=value) for suit in range(4) for value in range(13)]
-        self.cards += [Karte(suit=None, value=50), Karte(suit=None, value=50)]
+        self.cards += [Card(suit=suit, value=value) for suit in range(4) for value in range(13)]
+        self.cards += [Card(suit=None, value=50), Card(suit=None, value=50)]
 
     def shuffle(self) -> None:
         """Mischt das Kartendeck."""
         shuffle(self.cards)
 
-    def deal(self) -> Karte | None:
+    def deal(self) -> Card | None:
         """Entfernt die oberste Karte vom Stapel und returnt sie"""
         if self.cards:
             return self.cards.pop(0)
         return
 
-    def add_card_at_top(self, karte: Karte):
-        """Lege eine Karte oben auf das Deck"""
+    def add_card_at_top(self, karte: Card):
+        """Lege eine Card oben auf das Deck"""
         self.cards.insert(0, karte)
 
-    def add_card_at_bottom(self, karte: Karte):
+    def add_card_at_bottom(self, karte: Card):
         """Lege eine Karte unter das Deck"""
         self.cards.append(karte)
 
@@ -138,55 +138,70 @@ class Player:
     def __init__(self,
                  playerno: int,
                  name: str = "",
-                 hand: list[Karte, ...] = None):
+                 hand: list[Card, ...] = None,
+                 turn: bool = False):
         """
         Ein Spieler.
 
         :param playerno: Die Nummer des Spielers
         :param name: Der Name des Spielers
         :param hand: Die Hand des Spielers
+        :param turn: Gibt an, ob der Spieler an der Reihe ist
         """
         # Nummer (ID) des Spielers
         self.number = playerno
         # Name des Spielers
         if not name:
-            name = f"Spieler {self.number}"
+            name = f"Player {self.number}"
         self.name = name
         # Hand des Spielers
         if not hand:
             hand = []
         self.hand = hand
+        self.turn = turn
 
     def __repr__(self):
         return f'{self.__class__.__name__}(number={self.number}, name="{self.name}", hand={self.hand})'
 
-    def take_card(self, karte: Karte):
+    def take_card(self, karte: Card):
         """Fügt eine Karte zur Hand des Spielers hinzu"""
         self.hand.append(karte)
 
-    def play_card_at_index(self, index: int) -> Karte | None:
+    def play_card_at_index(self, index: int) -> Card | None:
         """Entfernt die Karte aus der Hand des Spielers am gegebenen Index und returnt sie"""
         if 0 <= index <= len(self.hand) - 1:
             return self.hand.pop(index)
         return
 
+    def set_turn(self, turn: bool):
+        """Setzt den Spieler auf aktiv ("an der Reihe")"""
+        self.turn = turn
+
 
 class Game:
     def __init__(self,
                  players: int = 4,
-                 anfangskarten: int = 4):
+                 anfangskarten: int = 4,
+                 first_player: int = 0):
         """
-        Initialisiere das Spiel Castor.
+        Initialisiert das Spiel Castor:
+
+        - Erstellt (standardmäßig vier) :class:`Player`
+        - Erstellt ein volles :class:`Deck` Karten (der Nachziehstapel)
+        - Erstellt ein leeres Deck Karten (der Ablagestapel)
+        - Teilt jedem der Spieler (standardmäßig vier) Karten aus
 
         :param players: Die Anzahl an Spielern
         :param anfangskarten: Die Anzahl an Karten, die jeder Spieler zu Beginn bekommt.
+        :param first_player: Der Index desjenigen Spielers, der beginnt
         """
         # Erstelle ein Kartendeck
         self.deck = Deck(empty=False, shuffled=True)
-        # Erstelle einen Nachziehstapel
+        # Erstelle einen Ablagestapel
         self.stapel = Deck(empty=True)
-        # Erstelle die Spieler
-        self.spieler = [Player(playerno=i+1) for i in range(players)]
+        # Erstelle die Player
+        self.spieler = [Player(playerno=i + 1) for i in range(players)]
+        self.spieler[first_player].set_turn(True)
         # Beginne mit x Karten pro Spieler
         self.anfangskarten = anfangskarten
 
