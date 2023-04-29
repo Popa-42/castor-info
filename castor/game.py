@@ -71,69 +71,6 @@ class Card:
         return str(self.value)
 
 
-class Deck:
-    def __init__(self,
-                 empty: bool = False,
-                 shuffled: bool = False):
-        """
-        Ein Kartendeck. Enthält eine Liste mit Objekten der Klasse :class:`Card`.
-
-        :param empty: Gibt an, ob das Kartendeck beim Erstellen leer bleiben soll.
-        :param shuffled: Gibt an, ob das Kartendeck nach dem Erstellen gemischt werden soll.
-        """
-        self.cards: list[Card, ...] = []
-
-        # Füge alle Karten zu dem Deck hinzu
-        if not empty:
-            self.new_deck()
-        # Mische das Deck
-        if shuffled and not empty:
-            self.shuffle()
-
-    def __repr__(self) -> str:
-        """
-        Was bei ``str(Deck)`` bzw ``print(Deck)`` zurückgegeben wird, z.B.:
-
-        >>> deck = Deck()
-        >>> print(deck)
-        'Deck(cards=[Card(suit=0, value=0), ...])'
-
-        :param self: Bezieht sich auf die Instanz der Klasse
-        :return: Eine String-Repräsentation des Objekts
-        """
-        return f"{self.__class__.__name__}(cards={self.cards})"
-
-    def new_deck(self, clear: bool = False):
-        """
-        Fügt Standard-Pokerkarten zum Deck hinzu (von 2 bis Ass)
-
-        :param clear: Gibt an, ob das Deck zunächst geleert werden soll, bevor die neuen Karten hinzugefügt werden
-        :return: Nichts
-        """
-        if clear:
-            self.cards = []
-        self.cards += [Card(suit=suit, value=value) for suit in range(4) for value in range(13)]
-        self.cards += [Card(suit=None, value=50), Card(suit=None, value=50)]
-
-    def shuffle(self) -> None:
-        """Mischt das Kartendeck."""
-        shuffle(self.cards)
-
-    def deal(self) -> Card | None:
-        """Entfernt die oberste Karte vom Stapel und returnt sie"""
-        if self.cards:
-            return self.cards.pop(0)
-        return
-
-    def add_card_at_top(self, karte: Card):
-        """Lege eine Card oben auf das Deck"""
-        self.cards.insert(0, karte)
-
-    def add_card_at_bottom(self, karte: Card):
-        """Lege eine Karte unter das Deck"""
-        self.cards.append(karte)
-
-
 class Player:
     def __init__(self,
                  playerno: int,
@@ -177,6 +114,9 @@ class Player:
         """Setzt den Spieler auf aktiv ("an der Reihe")"""
         self.turn = turn
 
+    def get_turn(self) -> bool:
+        return self.turn
+
 
 class Game:
     def __init__(self,
@@ -195,18 +135,35 @@ class Game:
         :param anfangskarten: Die Anzahl an Karten, die jeder Spieler zu Beginn bekommt.
         :param first_player: Der Index desjenigen Spielers, der beginnt
         """
-        # Erstelle ein Kartendeck
-        self.deck = Deck(empty=False, shuffled=True)
+        # Erstelle einen Nachziehstapel (Oberste Karte: Index 0)
+        self.deck: list[Card, ...] = [Card(suit=s, value=v) for s in range(4) for v in range(13)]
+        self.deck += [Card(None, 50), Card(None, 50)]
+        shuffle(self.deck)
         # Erstelle einen Ablagestapel
-        self.stapel = Deck(empty=True)
+        self.ablage: list[Card, ...] = []
         # Erstelle die Player
-        self.spieler = [Player(playerno=i + 1) for i in range(players)]
-        self.spieler[first_player].set_turn(True)
+        self.players = [Player(playerno=i + 1) for i in range(players)]
+        self.players[first_player].set_turn(True)
         # Beginne mit x Karten pro Spieler
         self.anfangskarten = anfangskarten
 
     def deal_cards_to_all(self):
         """Gibt jedem Spieler zu Beginn des Spiels seine Karten"""
-        for s in self.spieler:
+        for s in self.players:
             for _ in range(self.anfangskarten):
-                s.take_card(self.deck.deal())
+                s.take_card(self.deck.pop(0))
+
+    def draw_card(self) -> Card:
+        """Zieht die oberste Karte des Decks. Wenn der Nachziehstapel leer ist, Ablagestapel mischen und neu benutzen"""
+        if not self.deck:
+            shuffle(self.ablage)
+            self.deck = self.ablage
+            self.ablage = []
+        return self.deck.pop(0)
+
+    def get_current_player(self) -> Player:
+        """Gibt den aktuellen Spieler zurück"""
+        for player in self.players:
+            if player.get_turn():
+                return player
+        raise Exception("Etwas ist schiefgelaufen: Kein Spieler ist aktuell an der Reihe.")
