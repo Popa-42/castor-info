@@ -6,8 +6,8 @@ if __name__ == '__main__':
     # Wenn man diese Datei importiert und dann versucht auszuführen, passiert nichts.
 
     game = Game()
-    print(game.spieler)
+    print(game.players)
     print(game.deck)
     game.deal_cards_to_all()
-    print(game.spieler)
+    print(game.players)
     print(game.deck)
