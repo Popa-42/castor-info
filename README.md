@@ -7,8 +7,8 @@ Castor in Python, unter Verwendung des Moduls [Pyglet](https://pyglet.org/).
 ### Backend:
 - [ ] Das Grundgerüst für ein (beliebiges) Kartenspiel bauen
 - [ ] Das Grundgerüst für Castor bauen
-- [ ] Einen lokalen Server erstellen können und die einzelnen Geräte im selben Netzwerk
-mit dem Server verbinden können
+- [ ] Einen lokalen Server erstellen können und die einzelnen Geräte im selben Netzwerk mit 
+      dem Server verbinden können
 - [ ] Castor auf den lokalen Server packen
 
 ### Frontend:
@@ -27,8 +27,12 @@ Für die Installation von Pyglet braucht man zunächst einmal Python
 Installer sind ganz unten auf der Seite. **ACHTUNG:** Bitte auch _Add python.exe to PATH_
 bei der Installation angeben!)
 
-Wenn alles installiert ist, muss das Modul Pyglet installiert werden. Dazu ein Terminal
-öffnen (`Win` + `R` und dann `cmd` eingeben) und den folgenden Command eingeben:
+Tatsächlich muss Pyglet gar nicht mehr installiert werden; es reicht, wenn der pyglet-Ordner
+mit den ganzen Dateien des Moduls in unserem Ordner vorhanden ist. Es muss also _doch_ nichts
+installiert werden. Trotzdem hier noch die Kurzfassung, wie man Pyglet für Python installiert:
+
+Zunächst ein Terminal  öffnen (`Win` + `R` und dann `cmd` eingeben) und den folgenden Command
+eingeben:
 
     python -m pip install pyglet --user
 

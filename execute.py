@@ -11,3 +11,8 @@ if __name__ == '__main__':
     game.deal_cards_to_all()
     print(game.players)
     print(game.deck)
+
+    game.player_drops_card(game.get_current_player_num(), 0)
+    print(game.ablage)
+    print(game.get_current_player())
+    print(game.check_top_card(Card(suit=1, value=1)))
