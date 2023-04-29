@@ -28,15 +28,9 @@ class Card:
         :param self: Bezieht sich auf die Instanz der Klasse
         :return: Eine String-Repräsentation des Objekts
         """
-        return f"({self.suit}, {self.value})"
+        return f"{self.__class__.__name__}(suit={self.suit}, value={self.value})"
 
-    def get_value(self) -> int:
-        return self.value
-
-    def get_suit(self) -> int:
-        return self.suit
-
-    def get_suit_str(self) -> str:
+    def return_suit(self) -> str:
         """
         Gibt die Farbe der jeweiligen Karte in Form eines Strings zurück.
 
@@ -55,7 +49,7 @@ class Card:
             return ""
         raise IndexError("Diese Farbe existiert nicht.")
 
-    def get_value_str(self) -> str:
+    def return_value(self) -> str:
         """
         Gibt den Wert der jeweiligen Karte in Form eines Strings zurück.
 
@@ -133,7 +127,7 @@ class Game:
         Initialisiert das Spiel Castor:
 
         - Erstellt (standardmäßig vier) :class:`Player`
-        - Erstellt ein volles Deck Karten (der Nachziehstapel)
+        - Erstellt ein volles :class:`Deck` Karten (der Nachziehstapel)
         - Erstellt ein leeres Deck Karten (der Ablagestapel)
         - Teilt jedem der Spieler (standardmäßig vier) Karten aus
 
@@ -145,7 +139,7 @@ class Game:
         self.deck: list[Card, ...] = [Card(suit=s, value=v) for s in range(4) for v in range(13)]
         self.deck += [Card(None, 50), Card(None, 50)]
         shuffle(self.deck)
-        # Erstelle einen Ablagestapel (Oberste Karte: Index -1)
+        # Erstelle einen Ablagestapel
         self.ablage: list[Card, ...] = []
         # Erstelle die Player
         self.players = [Player(playerno=i + 1) for i in range(players)]
@@ -173,31 +167,3 @@ class Game:
             if player.get_turn():
                 return player
         raise Exception("Etwas ist schiefgelaufen: Kein Spieler ist aktuell an der Reihe.")
-
-    def get_current_player_num(self) -> int:
-        """Gibt den Index des aktuellen Spielers zurück"""
-        return self.players.index(self.get_current_player())
-
-    def player_drops_card(self, player: int, card: int):
-        """
-        Der ausgewählte Spieler legt die Karte an dem Index auf den Ablagestapel.
-
-        :param player: Der Index des Spielers
-        :param card: Der Index der Karte in der Hand des Spielers
-        :return: Nichts
-        """
-        try:
-            if karte := self.players[player].play_card_at_index(card):
-                self.ablage.append(karte)
-            else:
-                print(f"An der Stelle {card} ist keine Karte.")
-        except IndexError:
-            print("Dieser Spieler existiert nicht.")
-
-    def check_top_card(self, card: Card) -> bool:
-        """Überprüft, ob der Wert der obersten Karte mit dem der angegebenen Karte übereinstimmt."""
-        return self.ablage[-1].get_value() == card.get_value()
-
-    def export_game_as_str(self) -> str:
-        export = str(self.deck) + "\n" + str(self.ablage) + "\n" + str(self.players)
-        return export
