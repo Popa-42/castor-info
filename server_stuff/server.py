@@ -24,7 +24,7 @@ def send_to_all_clients(data):
 
 def threaded_client(conn, addr):
     while True:
-        #data = conn.recv(2048)
+        # data = conn.recv(2048)
         pass
 
 
