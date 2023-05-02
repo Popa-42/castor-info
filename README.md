@@ -13,7 +13,7 @@ mit dem Server verbinden können
 
 ### Frontend:
 - [ ] Die Bilder scannen
-- [ ] Einen Plan für die GUI erstellen
+- [x] Einen Plan für die GUI erstellen
 - [ ] Pyglet verstehen und damit klarkommen
 - [ ] Die GUI erstellen
 - [ ] Die GUI mit dem Base-Game verknüpfen

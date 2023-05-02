@@ -14,7 +14,7 @@ window.set_caption("Neuer Titel")
 window.set_fullscreen(False)
 
 label = pyglet.text.Label('Hello, world!',
-                          #font_name='Papyrus',
+                          font_name='Comic Sans MS',
                           font_size=36,
                           x=window.width // 2, y=window.height // 2,
                           anchor_x='center', anchor_y='center')
