@@ -74,20 +74,20 @@ class Card:
 
 class Player:
     def __init__(self,
-                 playerno: int,
+                 number: int,
                  name: str = "",
                  hand: list[Card, ...] = None,
                  turn: bool = False):
         """
         Ein Spieler.
 
-        :param playerno: Die Nummer des Spielers
+        :param number: Die Nummer des Spielers
         :param name: Der Name des Spielers
         :param hand: Die Hand des Spielers
         :param turn: Gibt an, ob der Spieler an der Reihe ist
         """
         # Nummer (ID) des Spielers
-        self.number = playerno
+        self.number = number
         # Name des Spielers
         if not name:
             name = f"Spieler {self.number}"
@@ -144,7 +144,7 @@ class Game:
         # Erstelle einen Ablagestapel
         self.ablage: list[Card, ...] = []
         # Erstelle die Player
-        self.players = [Player(playerno=i + 1) for i in range(players)]
+        self.players = [Player(number=i + 1) for i in range(players)]
         self.players[first_player].set_turn(True)
         # Beginne mit x Karten pro Spieler
         self.start_cards = anfangskarten
@@ -181,6 +181,20 @@ class Game:
     def import_state(self, save: bytes):
         game: dict = eval(save.decode())
         players = game["players"]
-        self.deck = game["deck"]
-        self.start_cards = game["start_cards"]
-        self.ablage = game["ablage"]
+        self.players = [Player(
+            number=p["number"],
+            hand=p["hand"],
+            name=p["name"],
+            turn=p["turn"]
+        ) for p in players]
+
+        deck = game["deck"]
+        self.deck = [Card(suit=c["suit"], value=c["value"]) for c in deck]
+
+        ablage = game["ablage"]
+        if ablage:
+            self.ablage = [Card(suit=c["suit"], value=c["value"]) for c in ablage]
+        else:
+            self.ablage = []
+
+        self.start_cards = int(game["start_cards"])
