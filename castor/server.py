@@ -45,4 +45,5 @@ while True:
 
     print(f"TCP Connected to {client_ip}")
     (conn, addr) = sock.accept()
+    clients.append((conn, addr))
     _thread.start_new_thread(threaded_client, (conn, addr))
