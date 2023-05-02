@@ -89,7 +89,7 @@ class Player:
         self.number = playerno
         # Name des Spielers
         if not name:
-            name = f"Player {self.number}"
+            name = f"Spieler {self.number}"
         self.name = name
         # Hand des Spielers
         if not hand:
