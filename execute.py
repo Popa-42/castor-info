@@ -11,3 +11,7 @@ if __name__ == '__main__':
     game.deal_cards_to_all()
     print(game.players)
     print(game.deck)
+    print(game)
+    state = game.export_current_state()
+    game.import_state(state)
+    print(game.players[2].turn)

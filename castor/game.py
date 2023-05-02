@@ -28,7 +28,8 @@ class Card:
         :param self: Bezieht sich auf die Instanz der Klasse
         :return: Eine String-Repräsentation des Objekts
         """
-        return f"{self.__class__.__name__}(suit={self.suit}, value={self.value})"
+        repr_dict = {"suit": self.suit, "value": self.value}
+        return f"{repr_dict}"
 
     def return_suit(self) -> str:
         """
@@ -98,7 +99,8 @@ class Player:
         self.turn = turn
 
     def __repr__(self):
-        return f'{self.__class__.__name__}(number={self.number}, name="{self.name}", hand={self.hand})'
+        repr_dict = {"number": self.number, "name": self.name, "turn": self.turn, "hand": self.hand}
+        return f"{repr_dict}"
 
     def take_card(self, karte: Card):
         """Fügt eine Karte zur Hand des Spielers hinzu"""
@@ -145,12 +147,16 @@ class Game:
         self.players = [Player(playerno=i + 1) for i in range(players)]
         self.players[first_player].set_turn(True)
         # Beginne mit x Karten pro Spieler
-        self.anfangskarten = anfangskarten
+        self.start_cards = anfangskarten
+
+    def __repr__(self) -> str:
+        repr_dict = {"deck": self.deck, "ablage": self.ablage, "players": self.players, "start_cards": self.start_cards}
+        return f"{repr_dict}"
 
     def deal_cards_to_all(self):
         """Gibt jedem Spieler zu Beginn des Spiels seine Karten"""
         for s in self.players:
-            for _ in range(self.anfangskarten):
+            for _ in range(self.start_cards):
                 s.take_card(self.deck.pop(0))
 
     def draw_card(self) -> Card:
@@ -167,3 +173,14 @@ class Game:
             if player.get_turn():
                 return player
         raise Exception("Etwas ist schiefgelaufen: Kein Spieler ist aktuell an der Reihe.")
+
+    def export_current_state(self) -> bytes:
+        state = self.__repr__()
+        return state.encode()
+
+    def import_state(self, save: bytes):
+        game: dict = eval(save.decode())
+        players = game["players"]
+        self.deck = game["deck"]
+        self.start_cards = game["start_cards"]
+        self.ablage = game["ablage"]
