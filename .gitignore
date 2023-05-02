@@ -173,6 +173,7 @@ cython_debug/
 .idea/**/shelf
 .idea/misc.xml
 .idea/vcs.xml
+.idea/castor-info.iml
 
 # AWS User-specific
 .idea/**/aws.xml
