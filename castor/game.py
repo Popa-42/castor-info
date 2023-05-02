@@ -28,7 +28,8 @@ class Card:
         :param self: Bezieht sich auf die Instanz der Klasse
         :return: Eine String-Repräsentation des Objekts
         """
-        return f"{self.__class__.__name__}(suit={self.suit}, value={self.value})"
+        repr_dict = {"suit": self.suit, "value": self.value}
+        return f"{repr_dict}"
 
     def return_suit(self) -> str:
         """
@@ -73,20 +74,20 @@ class Card:
 
 class Player:
     def __init__(self,
-                 playerno: int,
+                 number: int,
                  name: str = "",
                  hand: list[Card, ...] = None,
                  turn: bool = False):
         """
         Ein Spieler.
 
-        :param playerno: Die Nummer des Spielers
+        :param number: Die Nummer des Spielers
         :param name: Der Name des Spielers
         :param hand: Die Hand des Spielers
         :param turn: Gibt an, ob der Spieler an der Reihe ist
         """
         # Nummer (ID) des Spielers
-        self.number = playerno
+        self.number = number
         # Name des Spielers
         if not name:
             name = f"Spieler {self.number}"
@@ -98,7 +99,8 @@ class Player:
         self.turn = turn
 
     def __repr__(self):
-        return f'{self.__class__.__name__}(number={self.number}, name="{self.name}", hand={self.hand})'
+        repr_dict = {"number": self.number, "name": self.name, "turn": self.turn, "hand": self.hand}
+        return f"{repr_dict}"
 
     def take_card(self, karte: Card):
         """Fügt eine Karte zur Hand des Spielers hinzu"""
@@ -142,15 +144,19 @@ class Game:
         # Erstelle einen Ablagestapel
         self.ablage: list[Card, ...] = []
         # Erstelle die Player
-        self.players = [Player(playerno=i + 1) for i in range(players)]
+        self.players = [Player(number=i + 1) for i in range(players)]
         self.players[first_player].set_turn(True)
         # Beginne mit x Karten pro Spieler
-        self.anfangskarten = anfangskarten
+        self.start_cards = anfangskarten
+
+    def __repr__(self) -> str:
+        repr_dict = {"deck": self.deck, "ablage": self.ablage, "players": self.players, "start_cards": self.start_cards}
+        return f"{repr_dict}"
 
     def deal_cards_to_all(self):
         """Gibt jedem Spieler zu Beginn des Spiels seine Karten"""
         for s in self.players:
-            for _ in range(self.anfangskarten):
+            for _ in range(self.start_cards):
                 s.take_card(self.deck.pop(0))
 
     def draw_card(self) -> Card:
@@ -167,3 +173,28 @@ class Game:
             if player.get_turn():
                 return player
         raise Exception("Etwas ist schiefgelaufen: Kein Spieler ist aktuell an der Reihe.")
+
+    def export_current_state(self) -> bytes:
+        state = self.__repr__()
+        return state.encode()
+
+    def import_state(self, save: bytes):
+        game: dict = eval(save.decode())
+        players = game["players"]
+        self.players = [Player(
+            number=p["number"],
+            hand=p["hand"],
+            name=p["name"],
+            turn=p["turn"]
+        ) for p in players]
+
+        deck = game["deck"]
+        self.deck = [Card(suit=c["suit"], value=c["value"]) for c in deck]
+
+        ablage = game["ablage"]
+        if ablage:
+            self.ablage = [Card(suit=c["suit"], value=c["value"]) for c in ablage]
+        else:
+            self.ablage = []
+
+        self.start_cards = int(game["start_cards"])

@@ -7,6 +7,7 @@ server_name = ""
 server_port = 9999
 server_address = (server_name, server_port)
 sock.bind((server_name, server_port))
+sock.listen()
 print(f"Started Castor server on port {server_port}")
 
 clients = []
@@ -38,6 +39,11 @@ while True:
     client_ip = addr[0]
     print(f"Connection attempt from {client_ip}")
 
-    conn = sock.connect((client_ip, 10000))
+    snd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    snd.connect((addr[0], 10000))
+    snd.close()
+
     print(f"TCP Connected to {client_ip}")
+    (conn, addr) = sock.accept()
+    clients.append((conn, addr))
     _thread.start_new_thread(threaded_client, (conn, addr))
