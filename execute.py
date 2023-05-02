@@ -2,8 +2,8 @@
 from castor.game import *
 
 # Achtung: Beim Import wird direkt alles ausgeführt!
-# import server_stuff.server as server
-# import server_stuff.client as client
+import server_stuff.server as server
+import server_stuff.client as client
 
 if __name__ == '__main__':
     # Das hier drunter wird nur dann beachtet, wenn die Datei selber ausgeführt wird.
