@@ -21,7 +21,8 @@ if __name__ == '__main__':
 
     state = game.export_current_state()
     game.import_state(state)
-    print(game.players[2].turn)
+    print(game.players[2].hand[0].return_suit())
     print(game.deck[3].return_suit())
     print(game.ablage[0].return_value())
-    print(game.start_cards, type(game.start_cards))
+    print(game.anfangskarten, type(game.anfangskarten))
+    print(game.game_won, type(game.game_won))
