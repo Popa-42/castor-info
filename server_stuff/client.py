@@ -15,7 +15,7 @@ def receive_thread(conn):
         print(data.decode())
 
 
-def send_to_server(data):
+def send_to_server(data: str):
     client.send(data.encode())
 
 
@@ -37,10 +37,14 @@ def start_client():
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((addr[0], 9999))
-    print("Connected to server")
     server_ip = addr[0]
+    print(f"Connected to server {server_ip}")
 
     _thread.start_new_thread(receive_thread, (client,))
 
     while True:
         pass
+
+
+if __name__ == '__main__':
+    start_client()
