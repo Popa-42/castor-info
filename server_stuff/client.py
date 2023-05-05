@@ -21,7 +21,7 @@ def send_to_server(data: str):
 
 def start_client():
     global server_ip, client
-    address = ('<broadcast>', 10001)
+    address = ('<broadcast>', 10000)
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
@@ -29,11 +29,11 @@ def start_client():
     client_socket.sendto(data.encode(), address)
     client_socket.close()
 
-    rec = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    rec.bind(("", 10000))
-    rec.listen()
-    (cn, addr) = rec.accept()
-    rec.close()
+    return_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return_sock.bind(('', 10001))
+
+    recv_data, addr = return_sock.recvfrom(2048)
+    return_sock.close()
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((addr[0], 9999))

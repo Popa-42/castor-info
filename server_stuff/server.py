@@ -23,30 +23,26 @@ def threaded_client(conn, addr):
         pass
 
 
-def search_connections(timeout: float, max_clients: int = 4):
+def search_connections(max_clients: int = 4):
     global sock, discovery_sock, clients
     # Ende, wenn mehr als max Clients
-    if len(clients) >= max_clients:
-        return
-    # Timeout
-    discovery_sock.settimeout(timeout)
-    # Versuche eine Verbindung herzustellen
-    try:
+    while len(clients) <= max_clients:
+        # Versuche eine Verbindung herzustellen
         recv_data, addr = discovery_sock.recvfrom(2048)
         client_ip = addr[0]
-        print(f"Connection attempt from {client_ip}")
+        print(f"UDP packet from {client_ip}")
 
-        snd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        snd.connect((addr[0], 10000))
-        snd.close()
+        address = (client_ip, 10001)
+        return_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        print(f"TCP Connected to {client_ip}")
+        return_socket.sendto("Castor Server".encode(), address)
+        return_socket.close()
+        print(f"Sent UDP return packet to {client_ip}")
+
         (conn, addr) = sock.accept()
+        print(f"TCP Connected to {client_ip}")
         clients.append((conn, addr))
         _thread.start_new_thread(threaded_client, (conn, addr))
-    # Suche dauerte länger als timeout, fahre mit dem Rest des Codes fort
-    except socket.timeout:
-        return
 
 
 def new_server():
@@ -61,21 +57,18 @@ def new_server():
     print(f"Started Castor server on port {server_port}.")
 
     # SERVER DISCOVERY
-    address = ('', 10001)
     discovery_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     discovery_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    discovery_sock.bind(address)
+    discovery_sock.bind(("", 10000))
 
 
-def start_server(timeout, max_clients, tick_function):
+def start_server(max_clients, tick_function):
     new_server()
 
-    # MAIN LOOP
-    while True:
-        # Suche nach Verbindungen und füge ggf den neuen Client hinzu
-        search_connections(timeout, max_clients)
-        tick_function()
+    search_connections(max_clients)
+
+    tick_function()
 
 
 if __name__ == '__main__':
-    start_server(0.1, 4, lambda: ...)
+    start_server(4, lambda: ...)
