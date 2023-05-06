@@ -1,6 +1,6 @@
 import socket
 import _thread
-from colors import *
+from terminal_colors import *
 
 clients = []
 sock: socket.socket = ...
@@ -53,7 +53,7 @@ def new_server():
     server_port = 9999
     server_name = ''
     server_address = (server_name, server_port)
-    sock.bind((server_name, server_port))
+    sock.bind(server_address)
     sock.listen()
     print(f"{GREEN}Started Castor server on port {BOLD}{DARK_YELLOW}{server_port}{RESET}\n")
 

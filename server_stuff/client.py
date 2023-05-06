@@ -1,6 +1,6 @@
 import socket
 import _thread
-from colors import *
+from terminal_colors import *
 
 server_ip = ""
 client = ...
@@ -16,7 +16,7 @@ def receive_thread(conn):
     while True:
         try:
             data = conn.recv(2048)
-            print(data.decode())
+            # print(data.decode())
         except ConnectionResetError:
             print(f"{RED_BACKGROUND}{BLACK}Lost connection to the server.{RESET}")
             active = False
@@ -30,12 +30,12 @@ def send_to_server(data: str):
 def start_client():
     global server_ip, client
     print(f"{DARK_YELLOW}Searching for server in your network...{RESET}\n")
-    address = ('<broadcast>', 10000)
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.SOL_UDP)
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-    data = "Castor Client"
-    client_socket.sendto(data.encode(), address)
+    address = ('<broadcast>', 10000)
+    data = b"Castor Client"
+    client_socket.sendto(data, address)
     client_socket.close()
 
     return_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -58,8 +58,11 @@ def start_client():
 
     _thread.start_new_thread(receive_thread, (client,))
 
-    while active:
-        pass
+    try:
+        while active:
+            pass
+    except KeyboardInterrupt:
+        print(f"{RED_BACKGROUND}{BLACK}Keyboard interrupt.{RESET}")
 
     print(f"{RED}Stopped Client.{RESET}")
 
