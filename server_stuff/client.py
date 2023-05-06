@@ -1,6 +1,6 @@
 import socket
 import _thread
-from terminal_colors import *
+from server_stuff.terminal_colors import *
 
 server_ip = ""
 client = ...

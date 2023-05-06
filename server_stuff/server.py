@@ -1,6 +1,6 @@
 import socket
 import _thread
-from terminal_colors import *
+from server_stuff.terminal_colors import *
 
 clients = []
 sock: socket.socket = ...
@@ -30,7 +30,7 @@ def search_connections(max_clients: int = 4):
         # Versuche eine Verbindung herzustellen
         recv_data, addr = discovery_sock.recvfrom(2048)
         client_ip = addr[0]
-        print(f"{GREEN}Received UDP packet from {CYAN}{client_ip}{RESET}")
+        print(f"{GREEN}Received UDP packet from {CYAN}{client_ip}:{addr[1]}{RESET}")
 
         address = (client_ip, 10001)
         return_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -80,4 +80,4 @@ def start_server(max_clients, tick_function):
 
 
 if __name__ == '__main__':
-    start_server(4, lambda: print("tick"))
+    start_server(4, lambda: ...)
