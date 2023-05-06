@@ -1,7 +1,6 @@
 # Diese Datei wird ausgeführt
 from castor.game import *
 
-# Achtung: Beim Import wird direkt alles in den Dateien, was nicht unter 'if __name__ == "__main__"' steht, ausgeführt!
 import server_stuff.server as server
 import server_stuff.client as client
 
@@ -9,6 +8,7 @@ if __name__ == '__main__':
     # Das hier drunter wird nur dann beachtet, wenn die Datei selber ausgeführt wird.
     # Wenn man diese Datei importiert und dann versucht auszuführen, passiert nichts.
 
+    # Initialisiere ein neues Spiel
     game = Game(erster_spieler=3)
     print(game.spielerliste)
     print(game.deck)
@@ -19,6 +19,7 @@ if __name__ == '__main__':
     played_card = game.spielerliste[0].play_card_at_index(2)
     game.ablage.append(played_card)
 
+    # Funktioniert Export / Import?
     state = game.export_current_state()
     game.import_state(state)
     print(game.spielerliste[2].hand[0].return_suit())
