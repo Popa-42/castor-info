@@ -1,11 +1,19 @@
 import socket
 import _thread
 from server_stuff.terminal_colors import *
+import argparse
+
+parser = argparse.ArgumentParser(description="Castor Server")
+
+parser.add_argument("-c", "--color", help="Uses colored terminal outputs. Terminal must support colors.", action="store_true")
+
+args = parser.parse_args()
+
+colored_terminal: bool = args.color
 
 clients = []
 sock: socket.socket = ...
 discovery_sock: socket.socket = ...
-
 
 def send_to_client(conn, data: str):
     conn.send(data.encode())
@@ -30,20 +38,27 @@ def search_connections(max_clients: int = 4):
         # Versuche eine Verbindung herzustellen
         recv_data, addr = discovery_sock.recvfrom(2048)
         client_ip = addr[0]
-        print(f"{GREEN}Received UDP packet from {CYAN}{client_ip}:{addr[1]}{RESET}")
+
+        if colored_terminal: print(f"{GREEN}Received UDP packet from {CYAN}{client_ip}:{addr[1]}{RESET}")
+        else: print(f"Received UDP packet from {client_ip}:{addr[1]}")
 
         address = (client_ip, 10001)
         return_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         return_socket.sendto("Castor Server".encode(), address)
         return_socket.close()
-        print(f"{GREEN}Sent UDP return packet to {CYAN}{client_ip}{RESET}")
+
+        if colored_terminal: print(f"{GREEN}Sent UDP return packet to {CYAN}{client_ip}{RESET}")
+        else: print(f"Sent UDP return packet to {client_ip}")
 
         (conn, addr) = sock.accept()
         clients.append((conn, addr))
-        print(f"{GREEN_BACKGROUND}{BLACK}TCP Connected to {DARK_YELLOW_BACKGROUND}{client_ip}{RESET}\n\n"
-              f"{BLUE}Number of connected Clients: {BOLD}{YELLOW}{len(clients)}{RESET_WEIGHT}{DARK_YELLOW}/{max_clients}{RESET}\n")
         _thread.start_new_thread(threaded_client, (conn, addr))
+
+        if colored_terminal: print(f"{GREEN_BACKGROUND}{BLACK}TCP Connected to {DARK_YELLOW_BACKGROUND}{client_ip}{RESET}\n\n"
+              f"{BLUE}Number of connected Clients: {BOLD}{YELLOW}{len(clients)}{RESET_WEIGHT}{DARK_YELLOW}/{max_clients}{RESET}\n")
+        else: print(f"TCP Connected to {client_ip}\n\n"
+              f"Number of connected Clients: {len(clients)}/{max_clients}\n")
 
 
 def new_server():
@@ -55,7 +70,9 @@ def new_server():
     server_address = (server_name, server_port)
     sock.bind(server_address)
     sock.listen()
-    print(f"{GREEN}Started Castor server on port {BOLD}{DARK_YELLOW}{server_port}{RESET}\n")
+
+    if colored_terminal: print(f"{GREEN}Started Castor server on port {BOLD}{DARK_YELLOW}{server_port}{RESET}\n")
+    else: print(f"Started Castor server on port {server_port}\n")
 
     # SERVER DISCOVERY
     discovery_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -75,7 +92,8 @@ def start_server(max_clients, tick_function):
         try:
             tick_function()
         except KeyboardInterrupt:
-            print(f"\n{RED_BACKGROUND}{BLACK} Server stopped due to keyboard interrupt. {RESET}")
+            if colored_terminal: print(f"\n{RED_BACKGROUND}{BLACK} Server stopped due to keyboard interrupt. {RESET}")
+            else: print(f"\nServer stopped due to keyboard interrupt.")
             break
 
 
