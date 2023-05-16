@@ -1,6 +1,6 @@
 import socket
 import _thread
-from server_stuff.terminal_colors import *
+from terminal_colors import *
 import argparse
 
 parser = argparse.ArgumentParser(description="Castor Server")
@@ -86,7 +86,8 @@ def start_server(max_clients, tick_function):
     # Search for connecting clients
     search_connections(max_clients)
 
-    print(f"{GREEN_BACKGROUND}{BLACK} Starting the game... {RESET}\n")
+    if colored_terminal: print(f"{GREEN_BACKGROUND}{BLACK} Starting the game... {RESET}\n")
+    else: print(f"Starting the game...\n")
     # MAIN LOOP: The game function
     while True:
         try:
