@@ -1,30 +1,44 @@
 import socket
-import _thread
+import time
+
 from terminal_colors import *
 
 server_ip = ""
 client = ...
-active = True
 
 
 def get_server_ip():
     return server_ip
 
 
-def receive_thread(conn):
-    global active
-    while True:
-        try:
-            data = conn.recv(2048)
-            # print(data.decode())
-        except ConnectionResetError:
-            print(f"{RED_BACKGROUND}{BLACK}Lost connection to the server.{RESET}")
-            active = False
-            break
-
-
 def send_to_server(data: str):
+    global client
     client.send(data.encode())
+
+
+def gamerunner():
+    global client
+    while True:
+        data = client.recv(2048)
+        data = data.decode()
+        print(f"Data ist {data}.")
+        # UPDATE
+        if data == "UPDATE":
+            pass
+        elif data == "TURN_START":
+            print("Spieler ist dran.")
+            # ASK CLIENT WHAT TO DO
+            #client.send("DRAW_ABLAGE".encode())
+            client.send("DRAW_DECK".encode())
+            time.sleep(3)
+            client.send("TAKE_CARD".encode())
+            pass
+        
+        elif data == "GAME_END":
+            pass
+        elif data == "ERROR":
+            pass
+
 
 
 def start_client():
@@ -56,11 +70,8 @@ def start_client():
     server_ip = addr[0]
     print(f"{GREEN}Connected to server {DARK_YELLOW_BACKGROUND}{BLACK}{server_ip}{RESET}\n")
 
-    _thread.start_new_thread(receive_thread, (client,))
-
     try:
-        while active:
-            pass
+        gamerunner()
     except KeyboardInterrupt:
         print(f"{RED_BACKGROUND}{BLACK}Keyboard interrupt.{RESET}")
 
