@@ -1,6 +1,13 @@
 import socket
 
+# some_file.py
+import sys
+
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, 'C:\\Users\\EGo\PycharmProjects\\castor-info')
+
 import castor.game
+
 from terminal_colors import *
 import argparse
 
@@ -60,10 +67,10 @@ def turn(clientnum):
         response = response.decode()
 
         if response == "TAKE_CARD":
-            print("Spieler nimmt die Karte")
+            print(f"Spieler nimmt die Karte {card.suit_str()} {card.value_str()}")
             pass
         elif response == "THROW_CARD":
-            print("Spieler nimmt die Karte nicht")
+            print(f"Spieler nimmt die Karte {card.suit_str()} {card.value_str()} nicht")
             pass
 
     clients[clientnum][0].send("TURN_END".encode())
@@ -86,6 +93,13 @@ def send_to_all_clients(data: bytes):
     global clients, game
     for cl in clients:
         cl[0].send(data)
+
+
+def gamerunner():
+    global game, clients
+    while True:
+        for i in range(4):
+            turn(i)
 
 
 def search_connections(max_clients: int = 4):
@@ -155,8 +169,8 @@ def start_server(max_clients, tick_function):
         print(f"{GREEN_BACKGROUND}{BLACK} Starting the game... {RESET}\n")
     else:
         print(f"Starting the game...\n")
-    turn(3)
     # MAIN LOOP: The game function
+    gamerunner()
 
     while True:
         try:

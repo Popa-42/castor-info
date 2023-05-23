@@ -29,7 +29,7 @@ class Card:
         karte = {"farbe": self.farbe, "wert": self.wert}
         return f"{karte}"
 
-    def return_suit(self) -> str:
+    def suit_str(self) -> str:
         """
         Gibt die Farbe der jeweiligen Karte in Form eines Strings zurück.
 
@@ -48,7 +48,7 @@ class Card:
             return ""
         raise IndexError("Diese Farbe existiert nicht.")
 
-    def return_value(self) -> str:
+    def value_str(self) -> str:
         """
         Gibt den Wert der jeweiligen Karte in Form eines Strings zurück.
 
@@ -163,7 +163,10 @@ class Game:
             shuffle(self.ablage)
             self.deck = self.ablage
             self.ablage = []
-        return self.deck.pop(0)
+        try:
+            return self.deck.pop(0)
+        except:
+            print("Das Deck ist leer.")
 
     def get_current_player(self) -> Player:
         """Gibt den aktuellen Spieler zurück"""

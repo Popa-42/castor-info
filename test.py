@@ -22,9 +22,9 @@ if __name__ == '__main__':
     # Funktioniert Export / Import?
     state = game.export_current_state()
     game.import_state(state)
-    print(game.spielerliste[2].hand[0].return_suit())
-    print(game.deck[3].return_suit())
-    print(game.ablage[0].return_value(), type(game.ablage[0].return_value()))
+    print(game.spielerliste[2].hand[0].suit_str())
+    print(game.deck[3].suit_str())
+    print(game.ablage[0].value_str(), type(game.ablage[0].value_str()))
     print(game.anfangskarten, type(game.anfangskarten))
     print(game.game_over, type(game.game_over))
     print(game.aktueller_spieler, type(game.aktueller_spieler))
