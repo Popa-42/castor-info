@@ -10,19 +10,19 @@ if __name__ == '__main__':
 
     # Initialisiere ein neues Spiel
     game = Game(erster_spieler=3)
-    print(game.spielerliste)
+    print(game.players)
     print(game.deck)
     game.deal_cards_to_all()
-    print(game.spielerliste)
+    print(game.players)
     print(game.deck)
     print(game)
-    played_card = game.spielerliste[0].play_card_at_index(2)
+    played_card = game.players[0].play_card_at_index(2)
     game.ablage.append(played_card)
 
     # Funktioniert Export / Import?
     state = game.export_current_state()
     game.import_state(state)
-    print(game.spielerliste[2].hand[0].suit_str())
+    print(game.players[2].hand[0].suit_str())
     print(game.deck[3].suit_str())
     print(game.ablage[0].value_str(), type(game.ablage[0].value_str()))
     print(game.anfangskarten, type(game.anfangskarten))

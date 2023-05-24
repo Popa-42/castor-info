@@ -28,17 +28,16 @@ def gamerunner():
         elif data == "TURN_START":
             print("Spieler ist dran.")
             # ASK CLIENT WHAT TO DO
-            #client.send("DRAW_ABLAGE".encode())
+            # client.send("DRAW_ABLAGE".encode())
             client.send("DRAW_DECK".encode())
             time.sleep(3)
             client.send("TAKE_CARD".encode())
             pass
-        
+
         elif data == "GAME_END":
             pass
         elif data == "ERROR":
             pass
-
 
 
 def start_client():

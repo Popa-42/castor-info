@@ -132,19 +132,21 @@ class Game:
         # Erstelle einen Ablagestapel
         self.ablage: list[Card, ...] = []
         # Erstelle die Player
-        self.spielerliste = [Player(nummer=i + 1) for i in range(spielerzahl)]
+        self.players = [Player(nummer=i + 1) for i in range(spielerzahl)]
         # Der erste Spieler
         self.aktueller_spieler = erster_spieler
         # Beginne mit x Karten pro Spieler
         self.anfangskarten = anfangskarten
         # Ob das Spiel gewonnen wurde
         self.game_over = False
+        # Wer den Joker gelegt hat
+        self.first_joker_by: int = ...
 
     def __repr__(self) -> str:
         aktueller_stand = {
             "deck": self.deck,
             "ablage": self.ablage,
-            "spielerliste": self.spielerliste,
+            "players": self.players,
             "anfangskarten": self.anfangskarten,
             "aktueller_spieler": self.aktueller_spieler,
             "game_over": self.game_over,
@@ -153,7 +155,7 @@ class Game:
 
     def deal_cards_to_all(self):
         """Gibt jedem Spieler zu Beginn des Spiels seine Karten"""
-        for s in self.spielerliste:
+        for s in self.players:
             for _ in range(self.anfangskarten):
                 s.take_card(self.deck.pop(0))
 
@@ -170,12 +172,12 @@ class Game:
 
     def get_current_player(self) -> Player:
         """Gibt den aktuellen Spieler zurück"""
-        return self.spielerliste[self.aktueller_spieler]
+        return self.players[self.aktueller_spieler]
 
     def next_player(self):
         """Der nächste Spieler"""
         self.aktueller_spieler += 1
-        self.aktueller_spieler %= len(self.spielerliste)
+        self.aktueller_spieler %= len(self.players)
 
     def export_current_state(self) -> bytes:
         state = self.__repr__()
@@ -185,8 +187,8 @@ class Game:
         # Convert imported bytes to dict
         game: dict = eval(save.decode())
         # Import Players from dict
-        spielerliste = game["spielerliste"]
-        self.spielerliste = [Player(
+        spielerliste = game["players"]
+        self.players = [Player(
             nummer=p["nummer"],
             hand=[Card(farbe=c["farbe"], wert=c["wert"]) for c in p["hand"]],
             name=p["name"]
@@ -207,3 +209,12 @@ class Game:
         self.aktueller_spieler = game["aktueller_spieler"]
         # Import whether the game was won
         self.game_over = game["game_over"]
+
+    def end_game(self):
+        self.game_over = True
+
+    def first_joker_laid_by(self, player_index: int):
+        self.first_joker_by = player_index
+
+    def player_throws_card_at(self, player_index: int, index: int):
+        self.players[player_index].play_card_at_index(index)
