@@ -101,6 +101,9 @@ class Player:
         """Fügt eine Karte zur Hand des Spielers hinzu"""
         self.hand.append(karte)
 
+    def swap_card_with_index(self, card: Card, index: int):
+        self.hand[index] = card
+
     def play_card_at_index(self, index: int) -> Card | None:
         """Entfernt die Karte aus der Hand des Spielers am gegebenen Index und returnt sie"""
         if 0 <= index <= len(self.hand) - 1:
@@ -134,7 +137,7 @@ class Game:
         # Erstelle die Player
         self.players = [Player(nummer=i + 1) for i in range(spielerzahl)]
         # Der erste Spieler
-        self.aktueller_spieler = erster_spieler
+        self.current_player = erster_spieler
         # Beginne mit x Karten pro Spieler
         self.anfangskarten = anfangskarten
         # Ob das Spiel gewonnen wurde
@@ -148,7 +151,7 @@ class Game:
             "ablage": self.ablage,
             "players": self.players,
             "anfangskarten": self.anfangskarten,
-            "aktueller_spieler": self.aktueller_spieler,
+            "current_player": self.current_player,
             "game_over": self.game_over,
         }
         return f"{aktueller_stand}"
@@ -161,23 +164,27 @@ class Game:
 
     def draw_card(self) -> Card:
         """Zieht die oberste Karte des Decks. Wenn der Nachziehstapel leer ist, Ablagestapel mischen und neu benutzen"""
-        if not self.deck:
+        if not self.deck and self.ablage:
             shuffle(self.ablage)
             self.deck = self.ablage
             self.ablage = []
-        try:
-            return self.deck.pop(0)
-        except:
-            print("Das Deck ist leer.")
+        elif not self.deck and not self.ablage:
+            raise Exception("Sowohl das Deck als auch der Ablagestapel sind leer.")
+        return self.deck.pop(0)
+
+    def draw_ablage(self) -> Card:
+        """Zieht die oberste Karte vom Ablagestapel."""
+        if self.ablage:
+            return self.ablage.pop(0)
 
     def get_current_player(self) -> Player:
         """Gibt den aktuellen Spieler zurück"""
-        return self.players[self.aktueller_spieler]
+        return self.players[self.current_player]
 
     def next_player(self):
         """Der nächste Spieler"""
-        self.aktueller_spieler += 1
-        self.aktueller_spieler %= len(self.players)
+        self.current_player += 1
+        self.current_player %= len(self.players)
 
     def export_current_state(self) -> bytes:
         state = self.__repr__()
@@ -206,7 +213,7 @@ class Game:
         else:
             self.ablage = []
         self.anfangskarten = game["anfangskarten"]
-        self.aktueller_spieler = game["aktueller_spieler"]
+        self.current_player = game["current_player"]
         # Import whether the game was won
         self.game_over = game["game_over"]
 
@@ -216,5 +223,9 @@ class Game:
     def first_joker_laid_by(self, player_index: int):
         self.first_joker_by = player_index
 
+    def throw_card_to_ablage(self, card: Card):
+        self.ablage.insert(0, card)
+
     def player_throws_card_at(self, player_index: int, index: int):
-        self.players[player_index].play_card_at_index(index)
+        card = self.players[player_index].play_card_at_index(index)
+        self.throw_card_to_ablage(card)

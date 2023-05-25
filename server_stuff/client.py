@@ -1,10 +1,10 @@
 import socket
-import time
+from time import sleep as wait
 
 from terminal_colors import *
 
 server_ip = ""
-client = ...
+client: socket.socket = ...
 
 
 def get_server_ip():
@@ -19,25 +19,34 @@ def send_to_server(data: str):
 def gamerunner():
     global client
     while True:
-        data = client.recv(2048)
-        data = data.decode()
+        data: bytes = client.recv(2048)
+        data: str = data.decode()
+        data: dict = eval(data)
+
         print(f"Data ist {data}.")
-        # UPDATE
-        if data == "UPDATE":
-            pass
-        elif data == "TURN_START":
+        wait(1)
+
+        if data["action"] == "TURN_START":
             print("Spieler ist dran.")
-            # ASK CLIENT WHAT TO DO
-            # client.send("DRAW_ABLAGE".encode())
-            client.send("DRAW_DECK".encode())
-            time.sleep(3)
-            client.send("TAKE_CARD".encode())
+            action = input("Was willst du tun?\n[1] Ablage\n[2] Deck\n > ")
+            if action == "1":
+                response = {"action": "DRAW_ABLAGE"}
+                client.send(str(response).encode())
+                wait(1)
+
+            response = {"action": "DRAW_DECK"}
+            client.send(str(response).encode())
+            wait(1)
+
+            response = {"action": "TAKE_CARD"}
+            client.send(str(response).encode())
             pass
 
-        elif data == "GAME_END":
+        elif data["action"] == "TURN_END":
             pass
-        elif data == "ERROR":
-            pass
+        elif data["action"] == "ERROR" or data == "":
+            print(f"\n{RED_BACKGROUND}{BLACK}A fatal error occured.{RESET}")
+            break
 
 
 def start_client():

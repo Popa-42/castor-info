@@ -27,6 +27,6 @@ if __name__ == '__main__':
     print(game.ablage[0].value_str(), type(game.ablage[0].value_str()))
     print(game.anfangskarten, type(game.anfangskarten))
     print(game.game_over, type(game.game_over))
-    print(game.aktueller_spieler, type(game.aktueller_spieler))
+    print(game.current_player, type(game.current_player))
     game.next_player()
-    print(game.aktueller_spieler)
+    print(game.current_player)

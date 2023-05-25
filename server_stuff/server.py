@@ -1,6 +1,6 @@
 import socket
+from time import sleep as wait
 
-# some_file.py
 import sys
 
 # caution: path[0] is reserved for script path (or '' in REPL)
@@ -10,8 +10,6 @@ import castor.game
 
 from terminal_colors import *
 import argparse
-
-from castor import *
 
 parser = argparse.ArgumentParser(description="Castor Server")
 
@@ -27,79 +25,56 @@ sock: socket.socket = ...
 discovery_sock: socket.socket = ...
 
 
-def update():
-    global game
-    send_to_all_clients(game.export_current_state())
-
-
-def turn(clientnum):
-    print(f"Spieler {clientnum} ist dran.")
-    clients[clientnum][0].send("TURN_START".encode())
-
-    response = clients[clientnum][0].recv(2048)
-    response = response.decode()
-
-    print(f"Spieler sagt {response}.")
-
-    if response == "DRAW_ABLAGE":
-        # Spieler zieht vom Ablagestapel
-        # und darf danach nochmal spielen
-
-        # TODO: Gebe Spieler eine Karte
-
-        # TODO: Zeige Spieler eine Karte vom Deck
-
-        response = clients[clientnum][0].recv(2048)
-        response = response.decode()
-
-        if response == "TAKE_CARD":
-            print("Spieler nimmt die Karte")
-            pass
-        elif response == "THROW_CARD":
-            print("Spieler nimmt die Karte nicht")
-            pass
-
-    elif response == "DRAW_DECK":
-        card = game.draw_card()
-        show_card(clientnum, str(card))
-
-        response = clients[clientnum][0].recv(2048)
-        response = response.decode()
-
-        if response == "TAKE_CARD":
-            print(f"Spieler nimmt die Karte {card.suit_str()} {card.value_str()}")
-            pass
-        elif response == "THROW_CARD":
-            print(f"Spieler nimmt die Karte {card.suit_str()} {card.value_str()} nicht")
-            pass
-
-    clients[clientnum][0].send("TURN_END".encode())
-    print("Zug ist vorbei.")
-
-
-def show_card(clientnum, card):
-    clients[clientnum][0].send(card.encode())
-
-
-def end_turn(clientnum):
-    clients[clientnum][0].send("TURN_END".encode())
-
-
-def send_to_client(conn, data: bytes):
-    conn.send(data)
-
-
-def send_to_all_clients(data: bytes):
+def send_to_all_clients(action: str):
     global clients, game
-    for cl in clients:
-        cl[0].send(data)
+    for cl in range(len(clients)):
+        send_action(cl, "TURN_END")
+
+
+def get_response(client_index: int) -> dict:
+    response: bytes = clients[client_index][0].recv(2048)
+    response: str = response.decode()
+    response: dict = eval(response)
+    return response
+
+
+def send_action(client_index: int, action: str):
+    msg = {"action": action}
+    clients[client_index][0].send(str(msg).encode())
 
 
 def gamerunner():
     global game, clients
     while True:
-        for i in range(4):
-            turn(i)
+        # Server sendet "TURN_START"
+        current_player = game.current_player
+        send_action(current_player, "TURN_START")
+        print("Turn start")
+        # Server wartet auf Antwort
+        try:
+            response = get_response(current_player)
+            print(response)
+
+            if response["action"] == "DRAW_ABLAGE":
+                print(f"{GREEN_BACKGROUND}{BLACK}Ablage!{RESET}")
+                wait(0.5)
+
+            if response["action"] == "DRAW_DECK":
+                print(f"{DARK_YELLOW_BACKGROUND}{BLACK}Deck!{RESET}")
+                response = get_response(current_player)
+                print(response)
+                pass
+        except SyntaxError:
+            print(f"{DARK_YELLOW_BACKGROUND}{BLACK} A connection error occurred. {RESET}")
+
+        # Sendet "TURN_END" an ALLE Spieler und nächsten Spieler in game
+        end_turn()
+
+
+def end_turn():
+    global game, clients
+    send_to_all_clients("TURN_END")
+    game.next_player()
 
 
 def search_connections(max_clients: int = 4):
@@ -131,7 +106,8 @@ def search_connections(max_clients: int = 4):
 
         if colored_terminal:
             print(f"{GREEN_BACKGROUND}{BLACK}TCP Connected to {DARK_YELLOW_BACKGROUND}{client_ip}{RESET}\n\n"
-                  f"{BLUE}Number of connected Clients: {BOLD}{YELLOW}{len(clients)}{RESET_WEIGHT}{DARK_YELLOW}/{max_clients}{RESET}\n")
+                  f"{BLUE}Number of connected Clients: "
+                  f"{BOLD}{YELLOW}{len(clients)}{RESET_WEIGHT}{DARK_YELLOW}/{max_clients}{RESET}\n")
         else:
             print(f"TCP Connected to {client_ip}\n\n"
                   f"Number of connected Clients: {len(clients)}/{max_clients}\n")
@@ -158,7 +134,7 @@ def new_server():
     discovery_sock.bind(("", 10000))
 
 
-def start_server(max_clients, tick_function):
+def start_server(max_clients):
     global game
     # Create a new server
     new_server()
@@ -169,20 +145,11 @@ def start_server(max_clients, tick_function):
         print(f"{GREEN_BACKGROUND}{BLACK} Starting the game... {RESET}\n")
     else:
         print(f"Starting the game...\n")
+
     # MAIN LOOP: The game function
     gamerunner()
-
-    while True:
-        try:
-            tick_function()
-        except KeyboardInterrupt:
-            if colored_terminal:
-                print(f"\n{RED_BACKGROUND}{BLACK} Server stopped due to keyboard interrupt. {RESET}")
-            else:
-                print(f"\nServer stopped due to keyboard interrupt.")
-            break
 
 
 if __name__ == '__main__':
     game = castor.game.Game()
-    start_server(4, lambda: ...)
+    start_server(4)
