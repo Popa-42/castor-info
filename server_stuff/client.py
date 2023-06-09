@@ -24,7 +24,7 @@ def gamerunner():
         data: dict = eval(data)
 
         print(f"Data ist {data}.")
-        wait(1)
+        wait(0.1)
 
         if data["action"] == "TURN_START":
             print("Spieler ist dran.")
@@ -32,12 +32,14 @@ def gamerunner():
             if action == "1":
                 response = {"action": "DRAW_ABLAGE"}
                 client.send(str(response).encode())
-                wait(1)
+                wait(0.1)
 
+            response = ...
             response = {"action": "DRAW_DECK"}
             client.send(str(response).encode())
-            wait(1)
+            wait(0.1)
 
+            response = ...
             response = {"action": "TAKE_CARD"}
             client.send(str(response).encode())
             pass

@@ -32,13 +32,16 @@ def send_to_all_clients(action: str):
 
 
 def get_response(client_index: int) -> dict:
+    response = b""
     response: bytes = clients[client_index][0].recv(2048)
     response: str = response.decode()
     response: dict = eval(response)
+    print(response)
     return response
 
 
 def send_action(client_index: int, action: str):
+    msg = {}
     msg = {"action": action}
     clients[client_index][0].send(str(msg).encode())
 
@@ -49,31 +52,32 @@ def gamerunner():
         # Server sendet "TURN_START"
         current_player = game.current_player
         send_action(current_player, "TURN_START")
-        print("Turn start")
+        print(f"Turn start for player {current_player}, {clients[current_player][1][0]}:{clients[current_player][1][1]}")
         # Server wartet auf Antwort
         try:
-            response = get_response(current_player)
-            print(response)
-
-            if response["action"] == "DRAW_ABLAGE":
+            if rspns := get_response(current_player) == "DRAW_ABLAGE":
+                print(rspns)
                 print(f"{GREEN_BACKGROUND}{BLACK}Ablage!{RESET}")
-                wait(0.5)
+                wait(0.1)
 
-            if response["action"] == "DRAW_DECK":
+            if rspns := get_response(current_player) == "DRAW_DECK":
+                print(rspns)
                 print(f"{DARK_YELLOW_BACKGROUND}{BLACK}Deck!{RESET}")
                 response = get_response(current_player)
                 print(response)
                 pass
         except SyntaxError:
+            print()
             print(f"{DARK_YELLOW_BACKGROUND}{BLACK} A connection error occurred. {RESET}")
 
         # Sendet "TURN_END" an ALLE Spieler und nächsten Spieler in game
+        send_action(current_player, "TURN_END")
         end_turn()
 
 
 def end_turn():
     global game, clients
-    send_to_all_clients("TURN_END")
+    # send_to_all_clients("TURN_END")
     game.next_player()
 
 
