@@ -5,17 +5,17 @@ Castor in Python, unter Verwendung des Moduls [Pyglet](https://pyglet.org/).
 ## TODO
 
 ### Backend:
-- [ ] Das Grundgerüst für ein (beliebiges) Kartenspiel bauen
+- [x] Das Grundgerüst für ein (beliebiges) Kartenspiel bauen
 - [ ] Das Grundgerüst für Castor bauen
-- [ ] Einen lokalen Server erstellen können und die einzelnen Geräte im selben Netzwerk
+- [x] Einen lokalen Server erstellen können und die einzelnen Geräte im selben Netzwerk
 mit dem Server verbinden können
 - [ ] Castor auf den lokalen Server packen
 
 ### Frontend:
-- [ ] Die Bilder scannen
+- [x] Die Bilder scannen
 - [x] Einen Plan für die GUI erstellen
-- [ ] Pyglet verstehen und damit klarkommen
-- [ ] Die GUI erstellen
+- [x] Pyglet verstehen und damit klarkommen
+- [x] Die GUI erstellen
 - [ ] Die GUI mit dem Base-Game verknüpfen
 
 
