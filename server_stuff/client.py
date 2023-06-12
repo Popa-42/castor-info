@@ -20,7 +20,7 @@ def gamerunner():
     global client
     while True:
         data: bytes = client.recv(2048)
-        data: str = data.decode()
+        data: str = data.decode().split("}")[0] + "}"
         data: dict = eval(data)
 
         print(f"Data ist {data}.")
@@ -33,16 +33,17 @@ def gamerunner():
                 response = {"action": "DRAW_ABLAGE"}
                 client.send(str(response).encode())
                 wait(0.1)
+            elif action == "2":
+                response = ...
+                response = {"action": "DRAW_DECK"}
+                client.send(str(response).encode())
+                wait(0.1)
 
-            response = ...
-            response = {"action": "DRAW_DECK"}
-            client.send(str(response).encode())
-            wait(0.1)
-
-            response = ...
-            response = {"action": "TAKE_CARD"}
-            client.send(str(response).encode())
-            pass
+                #response = ...
+                #response = {"action": "TAKE_CARD"}
+                #client.send(str(response).encode())
+            else:
+                pass
 
         elif data["action"] == "TURN_END":
             pass

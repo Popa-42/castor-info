@@ -34,50 +34,50 @@ def send_to_all_clients(action: str):
 def get_response(client_index: int) -> dict:
     response = b""
     response: bytes = clients[client_index][0].recv(2048)
-    response: str = response.decode()
+    response: str = response.decode().split("}")[0] + "}"
     response: dict = eval(response)
-    print(response)
     return response
 
 
 def send_action(client_index: int, action: str):
-    msg = {}
     msg = {"action": action}
     clients[client_index][0].send(str(msg).encode())
 
 
 def gamerunner():
     global game, clients
+    current_player = 0
     while True:
         # Server sendet "TURN_START"
-        current_player = game.current_player
         send_action(current_player, "TURN_START")
         print(f"Turn start for player {current_player}, {clients[current_player][1][0]}:{clients[current_player][1][1]}")
         # Server wartet auf Antwort
         try:
-            if rspns := get_response(current_player) == "DRAW_ABLAGE":
-                print(rspns)
+            resp = get_response(current_player)
+            if resp['action'] == "DRAW_ABLAGE":
+                print(resp)
                 print(f"{GREEN_BACKGROUND}{BLACK}Ablage!{RESET}")
                 wait(0.1)
 
-            if rspns := get_response(current_player) == "DRAW_DECK":
-                print(rspns)
+            elif resp['action'] == "DRAW_DECK":
+                print(resp)
                 print(f"{DARK_YELLOW_BACKGROUND}{BLACK}Deck!{RESET}")
-                response = get_response(current_player)
-                print(response)
                 pass
+            else:
+                print(resp)
         except SyntaxError:
             print()
             print(f"{DARK_YELLOW_BACKGROUND}{BLACK} A connection error occurred. {RESET}")
 
         # Sendet "TURN_END" an ALLE Spieler und nächsten Spieler in game
         send_action(current_player, "TURN_END")
-        end_turn()
+        # end_turn()
+        current_player += 1
+        current_player %= len(clients)
 
 
 def end_turn():
     global game, clients
-    # send_to_all_clients("TURN_END")
     game.next_player()
 
 
