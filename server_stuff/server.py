@@ -1,10 +1,7 @@
 import socket
-from time import sleep as wait
 
 import sys
-
-# caution: path[0] is reserved for script path (or '' in REPL)
-sys.path.insert(1, 'C:\\Users\\EGo\PycharmProjects\\castor-info')
+sys.path.insert(1, r"..")   # Ändere den Import-Ordner
 
 import castor.game
 
@@ -25,14 +22,29 @@ sock: socket.socket = ...
 discovery_sock: socket.socket = ...
 
 
+def try_conn(function) -> bool:
+    """Returns False, wenn ConnectionResetError"""
+    try:
+        function()
+        return True
+    except ConnectionResetError:
+        print(f"\n{DARK_RED_BACKGROUND}{YELLOW}  - - - - - FATAL ERROR - - - - -  {RESET}")
+        print(f"{RED}Server lost connection to a Client.{RESET}")
+        print(f"\n{RED}Stopping Server...{RESET}")
+        return False
+
+
 def send_to_all_clients(action: str):
     global clients, game
     for cl in range(len(clients)):
-        send_action(cl, "TURN_END")
+        send_action(cl, action)
+
+
+def send(client_index: int, msg):
+    clients[client_index][0].send(str(msg).encode())
 
 
 def get_response(client_index: int) -> dict:
-    response = b""
     response: bytes = clients[client_index][0].recv(2048)
     response: str = response.decode().split("}")[0] + "}"
     response: dict = eval(response)
@@ -41,39 +53,84 @@ def get_response(client_index: int) -> dict:
 
 def send_action(client_index: int, action: str):
     msg = {"action": action}
-    clients[client_index][0].send(str(msg).encode())
+    send(client_index, msg)
+
+
+def send_card(client_index: int, card: str):
+    msg = {"card": card}
+    send(client_index, msg)
 
 
 def gamerunner():
     global game, clients
-    current_player = 0
-    while True:
-        # Server sendet "TURN_START"
-        send_action(current_player, "TURN_START")
-        print(f"Turn start for player {current_player}, {clients[current_player][1][0]}:{clients[current_player][1][1]}")
-        # Server wartet auf Antwort
-        try:
-            resp = get_response(current_player)
-            if resp['action'] == "DRAW_ABLAGE":
-                print(resp)
-                print(f"{GREEN_BACKGROUND}{BLACK}Ablage!{RESET}")
-                wait(0.1)
 
-            elif resp['action'] == "DRAW_DECK":
+    game.deal_cards_to_all()
+
+    while True:
+        current_player = game.current_player
+        if not try_conn(lambda: send_action(current_player, "TURN_START")):
+            break
+        print(
+            f"\n{DARK_BLUE_BACKGROUND}Turn start for player {current_player}, "
+            # IP-Adresse und Port
+            f"{DARK_YELLOW}{BOLD}{clients[current_player][1][0]}:{clients[current_player][1][1]}{RESET}")
+        # Server wartet auf Antwort
+        resp = get_response(current_player)
+
+        # Spieler will von der Ablage ziehen
+        if resp['action'] == "DRAW_ABLAGE":
+            # Debug
+            print(f"{GREEN_BACKGROUND}{BLACK}Ablage!{RESET}")
+
+            game.throw_card_to_ablage(game.draw_card())
+
+            # Karte vom Ablagestapel ziehen und senden
+            card = game.draw_ablage()
+            if card:
+                send_card(current_player, str(card))
+
+                resp = get_response(current_player)
                 print(resp)
-                print(f"{DARK_YELLOW_BACKGROUND}{BLACK}Deck!{RESET}")
-                pass
+                if resp["action"] == "KEEP_CARD_AT_INDEX":
+                    index = int(resp["index"])
+                    print("Index", resp["index"], index)
+                    print(game.get_current_player().hand)
+                    success = game.get_current_player().swap_card_with_index(card, index)
+                    print("Success:", success)
+
+                    while not success:
+                        send_action(current_player, "SEND_INDEX")
+                        resp = get_response(current_player)
+                        index = int(resp["index"])
+                        success = game.get_current_player().swap_card_with_index(card, index)
+
+                    send_action(current_player, "SUCCESS")
+
+            else:
+                response = {"card": "{'NONE': None}"}
+                send(current_player, response)
+
+        elif resp['action'] == "DRAW_DECK":
+            print(f"{DARK_YELLOW_BACKGROUND}{BLACK}Deck!{RESET}")
+            card = game.draw_card()
+            resp = get_response(current_player)
+            if resp['action'] == "TAKE_CARD":
+                send_card(current_player, str(card))
+                # TODO: player selects hand slot
+            elif resp['action'] == "THROW_CARD":
+                game.throw_card_to_ablage(card)
+                # TODO: broadcast to all players for ingamethrow
+
             else:
                 print(resp)
-        except SyntaxError:
-            print()
-            print(f"{DARK_YELLOW_BACKGROUND}{BLACK} A connection error occurred. {RESET}")
+        elif resp['action'] == "NEXT_PLAYER":
+            pass
+        else:
+            print(resp)
 
         # Sendet "TURN_END" an ALLE Spieler und nächsten Spieler in game
         send_action(current_player, "TURN_END")
-        # end_turn()
-        current_player += 1
-        current_player %= len(clients)
+        end_turn()
 
 
 def end_turn():

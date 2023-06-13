@@ -101,8 +101,13 @@ class Player:
         """Fügt eine Karte zur Hand des Spielers hinzu"""
         self.hand.append(karte)
 
-    def swap_card_with_index(self, card: Card, index: int):
-        self.hand[index] = card
+    def swap_card_with_index(self, card: Card, index: int) -> bool:
+        """Versucht, eine Karte der Hand des Spielers hinzuzufügen. Returns bool für Erfolg"""
+        try:
+            self.hand[index] = card
+            return True
+        except IndexError:
+            return False
 
     def play_card_at_index(self, index: int) -> Card | None:
         """Entfernt die Karte aus der Hand des Spielers am gegebenen Index und returnt sie"""

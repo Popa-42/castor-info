@@ -1,49 +1,83 @@
 import socket
-from time import sleep as wait
-
 from terminal_colors import *
 
 server_ip = ""
-client: socket.socket = ...
+server: socket.socket = ...
 
 
 def get_server_ip():
     return server_ip
 
 
-def send_to_server(data: str):
-    global client
-    client.send(data.encode())
+def receive():
+    data: bytes = server.recv(2048)
+    data: str = data.decode().split("}")[0] + "}"
+    data: dict = eval(data)
+    return data
+
+
+def receive_card():
+    data: bytes = server.recv(2048)
+    print(data)
+    # {'card': "{'farbe': 1, 'wert': 2}"}
+    data: str = data.decode().split("}")[0] + '}"}'
+    data: dict = eval(data)
+    return data
+
+
+def send(response: dict):
+    global server
+    server.send(str(response).encode())
+
+
+def send_action(action: str):
+    response = {"action": action}
+    send(response)
 
 
 def gamerunner():
-    global client
     while True:
-        data: bytes = client.recv(2048)
-        data: str = data.decode().split("}")[0] + "}"
-        data: dict = eval(data)
-
-        print(f"Data ist {data}.")
-        wait(0.1)
+        data = receive()
 
         if data["action"] == "TURN_START":
-            print("Spieler ist dran.")
             action = input("Was willst du tun?\n[1] Ablage\n[2] Deck\n > ")
-            if action == "1":
-                response = {"action": "DRAW_ABLAGE"}
-                client.send(str(response).encode())
-                wait(0.1)
-            elif action == "2":
-                response = ...
-                response = {"action": "DRAW_DECK"}
-                client.send(str(response).encode())
-                wait(0.1)
 
-                #response = ...
-                #response = {"action": "TAKE_CARD"}
-                #client.send(str(response).encode())
+            # Spieler will von der Ablage ziehen
+            if action == "1":
+                send_action("DRAW_ABLAGE")
+
+                # Empfange eine Karte vom Server
+                data = receive_card()
+                print(data["card"])
+
+                # Prüfe, ob auf dem Ablagestapel eine Karte liegt
+                if data["card"] != "{'NONE': None}":
+                    index = int(input("An welche Stelle soll die Karte gelegt werden?\n > "))
+                    # Sende Index als Antwort
+                    response = {"action": "KEEP_CARD_AT_INDEX", "index": index}
+                    send(response)
+
+                    data = receive()["action"]
+                    # Probiere es so lange wieder, bis Index valide
+                    while data == "SEND_INDEX":
+                        print(f"{RED}Ein Fehler ist aufgetreten.{RESET}")
+                        index = int(input("An welche Stelle soll die Karte gelegt werden?\n > "))
+                        response = {"action": "KEEP_CARD_AT_INDEX", "index": index}
+                        send(response)
+                        data = receive()["action"]
+
+                else:
+                    pass
+
+            elif action == "2":
+                response = {"action": "DRAW_DECK"}
+                send(response)
+
+                response = {"action": "TAKE_CARD"}
+                send(response)
             else:
-                pass
+                response = {"action": "NEXT_PLAYER"}
+                send(response)
 
         elif data["action"] == "TURN_END":
             pass
@@ -53,7 +87,7 @@ def gamerunner():
 
 
 def start_client():
-    global server_ip, client
+    global server_ip, server
     print(f"{DARK_YELLOW}Searching for server in your network...{RESET}\n")
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.SOL_UDP)
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -76,8 +110,8 @@ def start_client():
         return_sock.close()
         return
 
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((addr[0], 9999))
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.connect((addr[0], 9999))
     server_ip = addr[0]
     print(f"{GREEN}Connected to server {DARK_YELLOW_BACKGROUND}{BLACK}{server_ip}{RESET}\n")
 

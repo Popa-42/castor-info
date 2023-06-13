@@ -1,3 +1,6 @@
+# Farbiges Terminal
+# Quelle: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
+
 RESET = '\033[0m'
 
 # Font Weight
