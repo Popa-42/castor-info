@@ -115,6 +115,12 @@ class Player:
             return self.hand.pop(index)
         return
 
+    def get_hand(self) -> list[list[str]]:
+        liste = []
+        for c in self.hand:
+            liste.append([c.suit_str(), c.value_str()])
+        return liste
+
 
 class Game:
     def __init__(self,

@@ -1,9 +1,6 @@
 import socket
 
-import sys
-sys.path.insert(1, r"..")   # Ändere den Import-Ordner
-
-import castor.game
+from ..castor.game import *
 
 from terminal_colors import *
 import argparse
@@ -28,8 +25,10 @@ def try_conn(function) -> bool:
         function()
         return True
     except ConnectionResetError:
-        print(f"\n{DARK_RED_BACKGROUND}{YELLOW}  - - - - - FATAL ERROR - - - - -  {RESET}")
-        print(f"{RED}Server lost connection to a Client.{RESET}")
+        print(f"\n{DARK_RED_BACKGROUND}                                   {RESET}")
+        print(f"{DARK_RED_BACKGROUND}{YELLOW}  - - - - - {BOLD}FATAL ERROR{RESET_WEIGHT} - - - - -  {RESET}")
+        print(f"{DARK_RED_BACKGROUND}                                   {RESET}")
+        print(f"\n{RED}Server lost connection to a Client.{RESET}")
         print(f"\n{RED}Stopping Server...{RESET}")
         return False
 
@@ -93,8 +92,7 @@ def gamerunner():
                 print(resp)
                 if resp["action"] == "KEEP_CARD_AT_INDEX":
                     index = int(resp["index"])
-                    print("Index", resp["index"], index)
-                    print(game.get_current_player().hand)
+                    print(game.get_current_player().get_hand())
                     success = game.get_current_player().swap_card_with_index(card, index)
                     print("Success:", success)
 
@@ -181,7 +179,11 @@ def new_server():
     server_port = 9999
     server_name = ''
     server_address = (server_name, server_port)
-    sock.bind(server_address)
+    try:
+        sock.bind(server_address)
+    except OSError:
+        print("boo")
+        exit()
     sock.listen()
 
     if colored_terminal:
@@ -212,5 +214,5 @@ def start_server(max_clients):
 
 
 if __name__ == '__main__':
-    game = castor.game.Game()
+    game = Game()
     start_server(4)

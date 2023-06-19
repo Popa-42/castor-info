@@ -18,7 +18,6 @@ def receive():
 
 def receive_card():
     data: bytes = server.recv(2048)
-    print(data)
     # {'card': "{'farbe': 1, 'wert': 2}"}
     data: str = data.decode().split("}")[0] + '}"}'
     data: dict = eval(data)
@@ -48,23 +47,33 @@ def gamerunner():
 
                 # Empfange eine Karte vom Server
                 data = receive_card()
-                print(data["card"])
+                # print(data["card"])
 
                 # Prüfe, ob auf dem Ablagestapel eine Karte liegt
                 if data["card"] != "{'NONE': None}":
-                    index = int(input("An welche Stelle soll die Karte gelegt werden?\n > "))
-                    # Sende Index als Antwort
-                    response = {"action": "KEEP_CARD_AT_INDEX", "index": index}
-                    send(response)
-
-                    data = receive()["action"]
-                    # Probiere es so lange wieder, bis Index valide
-                    while data == "SEND_INDEX":
-                        print(f"{RED}Ein Fehler ist aufgetreten.{RESET}")
-                        index = int(input("An welche Stelle soll die Karte gelegt werden?\n > "))
+                    index = input("An welche Stelle soll die Karte gelegt werden?\n > ")
+                    try:
+                        index = int(index)
                         response = {"action": "KEEP_CARD_AT_INDEX", "index": index}
                         send(response)
                         data = receive()["action"]
+                    except ValueError:
+                        data = "SEND_INDEX"
+
+                    # Probiere es so lange wieder, bis Index valide
+                    while data == "SEND_INDEX":
+                        print(f"{RED}Ein Fehler ist aufgetreten.{RESET}")
+                        index = input("An welche Stelle soll die Karte gelegt werden?\n > ")
+                        try:
+                            index = int(index)
+                            response = {"action": "KEEP_CARD_AT_INDEX", "index": index}
+                            send(response)
+                            data = receive()["action"]
+                        except ValueError:
+                            pass
+
+                    # TODO: Server broadcast - THROWN_CARD + 3s Warten auf Client Throw,
+                    #  wenn keine Antwort: Client MUSS eine Karte ziehen
 
                 else:
                     pass
