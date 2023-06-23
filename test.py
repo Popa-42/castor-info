@@ -1,9 +1,6 @@
 # Diese Datei wird ausgeführt
 from castor.game import *
 
-import server_stuff.server as server
-import server_stuff.client as client
-
 if __name__ == '__main__':
     # Das hier drunter wird nur dann beachtet, wenn die Datei selber ausgeführt wird.
     # Wenn man diese Datei importiert und dann versucht auszuführen, passiert nichts.
