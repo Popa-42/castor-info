@@ -131,7 +131,13 @@ def send_card(client_index: int, card: str):
 def gamerunner():
     global game, clients
 
+    # Spiel: Teile allen Spielern Karten aus
     game.deal_cards_to_all()
+
+    # Broadcast an alle Clients: Äußere beiden Karten
+    for c in range(4):
+        hand = game.players[c].get_hand()
+        send(c, hand)
 
     while True:
         current_player = game.current_player
@@ -169,6 +175,8 @@ def gamerunner():
                         index = int(resp["index"])
                         success = game.get_current_player().swap_card_with_index(card, index)
 
+                    print("Neue Hand:", game.get_current_player().get_hand())
+
                     send_action(current_player, "SUCCESS")
 
             else:
@@ -177,6 +185,7 @@ def gamerunner():
 
         elif resp['action'] == "DRAW_DECK":
             print(f"{DARK_YELLOW_BACKGROUND}{BLACK}Deck!{RESET}")
+            print(f"")
             card = game.draw_card()
             resp = get_response(current_player)
 

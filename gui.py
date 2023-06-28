@@ -1,21 +1,23 @@
-###Ich habe hier schonmal das Spielfeld mit einem ClickListener für die Karten:
-###python
+# Ich habe hier schonmal das Spielfeld mit einem ClickListener für die Karten:
+# python
 import pyglet
 
 window = pyglet.window.Window(1000, 750)
-image = pyglet.resource.image('Platzhalter_Ass.jpg')
-im = pyglet.resource.image('Platzhalter_Ruck.jpg')
-rueck_image = pyglet.image.load('Platzhalter_Ruck.jpg')
+image = pyglet.resource.image("Firebird/#1.jpg")
+back = pyglet.resource.image('Firebird/bg.jpg')
+
+back.width, back.height = 90, 127
+image.width, image.height = 90, 127
 
 batch = pyglet.graphics.Batch()
 
 # Set anchor points for rotation
 image.anchor_x = image.width / 2
 image.anchor_y = image.height / 2
-im.anchor_x = image.width / 2
-im.anchor_x = image.height / 2
+back.anchor_x = image.width / 2
+back.anchor_x = image.height / 2
 
-card_spacing = 75
+card_spacing = 100
 
 
 class ClickableImage(pyglet.sprite.Sprite):
@@ -40,6 +42,7 @@ def add_if_not_exist(obj):
             return
     cards.append(obj)
 
+
 cards = []
 
 
@@ -48,21 +51,17 @@ def on_draw():
     window.clear()
 
     draw_repeat_horizontal(625, 75, image)
-    draw_repeat_horizontal(625, 625, im)
+    draw_repeat_horizontal(625, 625, back)
 
-    draw_repeat_vertical(40, 500, im)
-    draw_repeat_vertical(800, 500, im)
+    draw_repeat_vertical(40, 500, back)
+    draw_repeat_vertical(800, 500, back)
 
-    im.blit(150, 625)
+    back.blit(150, 625)
 
 
 def draw_repeat_vertical(x, y, image: pyglet.image):
     rotated_image = image.get_transform(rotate=90)
-    images = []
-    images.append(rotated_image)
-    images.append(rotated_image)
-    images.append(rotated_image)
-    images.append(rotated_image)
+    images = [rotated_image, rotated_image, rotated_image, rotated_image]
 
     for i, img in enumerate(images):
         c = ClickableImage(img, x, y - (card_spacing * i))
@@ -78,11 +77,7 @@ def draw_horizontal(x, y, images: [pyglet.image]):
 
 
 def draw_repeat_horizontal(x, y, image: pyglet.image):
-    images = []
-    images.append(image)
-    images.append(image)
-    images.append(image)
-    images.append(image)
+    images = [image, image, image, image]
 
     draw_horizontal(x, y, images)
 

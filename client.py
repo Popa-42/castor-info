@@ -36,6 +36,9 @@ def send_action(action: str):
 
 def gamerunner():
     while True:
+        hand = server.recv(2048).decode()
+        print("Hand:", hand)
+
         data = receive()
 
         if data["action"] == "TURN_START":
@@ -51,6 +54,8 @@ def gamerunner():
 
                 # Prüfe, ob auf dem Ablagestapel eine Karte liegt
                 if data["card"] != "{'NONE': None}":
+                    # Debug
+                    print(data["card"])
                     index = input("An welche Stelle soll die Karte gelegt werden?\n > ")
                     try:
                         index = int(index)
