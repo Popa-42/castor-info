@@ -50,36 +50,29 @@ cards = []
 def on_draw():
     window.clear()
 
-    draw_repeat_horizontal(625, 75, image)
-    draw_repeat_horizontal(625, 625, back)
+    draw_horizontal(625, 75, [image for _ in range(4)])
+    draw_horizontal(625, 625, [back for _ in range(4)])
 
-    draw_repeat_vertical(40, 500, back)
-    draw_repeat_vertical(800, 500, back)
+    draw_vertical(40, 500, [back for _ in range(4)])
+    draw_vertical(800, 500, [back for _ in range(4)])
 
     back.blit(150, 625)
 
 
-def draw_repeat_vertical(x, y, image: pyglet.image):
-    rotated_image = image.get_transform(rotate=90)
-    images = [rotated_image, rotated_image, rotated_image, rotated_image]
+def draw_vertical(x, y, images: list[pyglet.image]):
+    imgs = [image.get_transform(rotate=90) for image in images]
 
-    for i, img in enumerate(images):
+    for i, img in enumerate(imgs):
         c = ClickableImage(img, x, y - (card_spacing * i))
         c.draw()
         add_if_not_exist(c)
 
 
-def draw_horizontal(x, y, images: [pyglet.image]):
+def draw_horizontal(x, y, images: list[pyglet.image]):
     for i, img in enumerate(images):
         c = ClickableImage(img, x - (card_spacing * i), y)
         c.draw()
         add_if_not_exist(c)
-
-
-def draw_repeat_horizontal(x, y, image: pyglet.image):
-    images = [image, image, image, image]
-
-    draw_horizontal(x, y, images)
 
 
 @window.event
