@@ -1,15 +1,8 @@
-import pyglet
 import client
+import pyglet
+import threading
 
 window = pyglet.window.Window(700, 500)
-
-bg = pyglet.shapes.Rectangle(
-    x=0,
-    y=0,
-    width=window.width,
-    height=window.height,
-    color=(255, 255, 255, 255)
-)
 
 text = pyglet.text.Label(
     text="Searching for Castor Server in your network...",
@@ -29,7 +22,6 @@ def make_arrows(i: int):
     arrows = [pyglet.text.Label(
         text=">",
         font_name="Consolas",
-        color=(0, 0, 0, 255),
         x=20,
         y=window.height - (i+1)*20,
         anchor_x="left",
@@ -37,15 +29,18 @@ def make_arrows(i: int):
     ) for i in range(i)]
 
 
+outputs: int = 1
+
+
 @window.event
 def on_draw():
     window.clear()
-    bg.draw()
     text.draw()
-    make_arrows(8)
+    make_arrows(outputs)
     for a in arrows:
         a.draw()
 
 
 if __name__ == "__main__":
+    console = threading.Thread(target=lambda: client.start_client()).start()
     pyglet.app.run()
