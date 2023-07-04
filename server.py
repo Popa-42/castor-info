@@ -1,4 +1,5 @@
 import socket
+import time
 
 from castor.game import *
 
@@ -112,7 +113,12 @@ def get_response(client_index: int) -> dict:
     """Empfange eine Nachricht von einem bestimmten Client"""
     response: bytes = clients[client_index][0].recv(2048)
     response: str = response.decode().split("}")[0] + "}"
-    response: dict = eval(response)
+    try:
+        response: dict = eval(response)
+    except SyntaxError:
+        print(f"{RED_BACKGROUND}{BLACK}An evaluation error occurred.{RESET}")
+        print(f"{RED}Stopping Server...{RESET}")
+        exit()
     return response
 
 
@@ -178,6 +184,9 @@ def gamerunner():
                     print("Neue Hand:", game.get_current_player().get_hand())
 
                     send_action(current_player, "SUCCESS")
+                    time.sleep(0.5)
+
+                    send(current_player, "{'action': 'HAND', 'value': " + f"{game.get_current_player().get_hand()}" + "}")
 
             else:
                 response = {"card": "{'NONE': None}"}

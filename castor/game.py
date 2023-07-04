@@ -115,10 +115,36 @@ class Player:
             return self.hand.pop(index)
         return
 
-    def get_hand(self) -> list[list[str]]:
+    def get_hand(self) -> list[str]:
         liste = []
         for c in self.hand:
-            liste.append([c.suit_str(), c.value_str()])
+            match c.suit_str():
+                case "Kreuz":
+                    farbe = "c"
+                case "Pik":
+                    farbe = "s"
+                case "Herz":
+                    farbe = "h"
+                case "Karo":
+                    farbe = "d"
+                case "":
+                    farbe = "#"
+                case other:
+                    farbe = None
+            match c.value_str():
+                case "Joker":
+                    wert = "1"
+                case "Ass":
+                    wert = "A"
+                case "Bube":
+                    wert = "J"
+                case "Dame":
+                    wert = "Q"
+                case "König":
+                    wert = "K"
+                case other:
+                    wert = c.value_str()
+            liste.append(farbe + wert)
         return liste
 
 
