@@ -186,7 +186,10 @@ def gamerunner():
                     send_action(current_player, "SUCCESS")
                     time.sleep(0.5)
 
-                    send(current_player, "{'action': 'HAND', 'value': " + f"{game.get_current_player().get_hand()}" + "}")
+                    send(current_player,
+                         "{'action': 'GET_CARDS', 'hand': " + f"{game.get_current_player().get_hand()}" +
+                         ", 'ablage': " + f"{game.get_oberste_ablage()}" + "}"
+                         )
 
             else:
                 response = {"card": "{'NONE': None}"}

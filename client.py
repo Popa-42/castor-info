@@ -14,6 +14,7 @@ server_ip = ""
 server: socket.socket = ...
 
 hand: list[str] = ...
+ablage_karte: str = ...
 server_found = False
 
 
@@ -53,7 +54,7 @@ def send_action(action: str):
 
 
 def gamerunner():
-    global hand
+    global hand, ablage_karte
     hand_str = server.recv(2048).decode()
     hand = eval(hand_str)
     print("Hand:", hand)
@@ -115,9 +116,9 @@ def gamerunner():
 
         elif data["action"] == "TURN_END":
             pass
-        elif data["action"] == "HAND":
-            hand_str = data["value"]
-            hand = eval(hand_str)
+        elif data["action"] == "GET_CARDS":
+            cards_str = data["value"]
+            hand = eval(cards_str)["hand"]
         elif data["action"] == "ERROR" or data == "":
             print(f"\n{RED_BACKGROUND}{BLACK}A fatal error occured.{RESET}")
             pyglet.app.exit()
@@ -171,7 +172,7 @@ def start_client():
 
 window = pyglet.window.Window(700, 250)
 image = pyglet.resource.image("Firebird/#1.jpg")
-back = pyglet.resource.image('Firebird/bg.jpg')
+back = pyglet.resource.image('Firebird/bg.png')
 
 back.width, back.height = 90, 127
 image.width, image.height = 90, 127
@@ -219,8 +220,10 @@ def on_draw():
     window.clear()
 
     if hand is not ... and server_found:
+        # Spiel gestartet
         window.set_size(1000, 750)
 
+        # Bildkarten
         current_hand = [pyglet.resource.image(f"Firebird/{c}.jpg") for c in hand]
         current_hand.reverse()
         draw_horizontal(625, 75, current_hand)
@@ -228,46 +231,104 @@ def on_draw():
             img.width, img.height = 90, 127
             img.anchor_x = img.width / 2
             img.anchor_y = img.height / 2
+
+        # Rückseiten: Andere Spieler
         draw_horizontal(625, 625, [back for _ in range(4)])
         draw_vertical(40, 500, [back for _ in range(4)])
         draw_vertical(800, 500, [back for _ in range(4)])
+
+        # Nachziehstapel
         back.blit(150, 625)
 
+        # Ablagestapel
+        if ablage_karte is not Ellipsis:
+            ablage = pyglet.resource.image(f"Firebird/{ablage_karte}.jpg")
+        else:
+            ablage = pyglet.resource.image(r"Firebird/#2.jpg")
+        ablage.width, ablage.height = 90, 127
+        ablage.anchor_x, ablage.anchor_y = ablage.width//2, ablage.height//2
+        ablage.blit(460, 300)
+
     elif hand is ... and server_found:
-        window.set_size(700, 250)
-        text = pyglet.text.Label(
+        # Server gefunden und verbunden; warten auf Spielstart
+        bg = pyglet.shapes.Rectangle(
+            x=0,
+            y=0,
+            width=window.width,
+            height=window.height,
+            color=(13, 17, 23, 255)
+        )
+        text1 = pyglet.text.Label(
+            text="Searching for Server in your network...",
+            font_name="Consolas",
+            font_size=16,
+            x=50,
+            y=window.height - 20,
+            anchor_x="left",
+            anchor_y="top",
+        )
+        text2 = pyglet.text.Label(
+            text=f"Connected to Server {server.getpeername()[0]}:{server.getpeername()[1]}",
+            font_name="Consolas",
+            font_size=16,
+            x=50,
+            y=window.height - 50,
+            anchor_x="left",
+            anchor_y="top",
+        )
+        text3 = pyglet.text.Label(
             text="Waiting for Server to start the game...",
-            font_name="Segoe UI",
-            font_size=26,
-            color=(255, 255, 0, 255),
-            x=window.width//2,
-            y=window.height//2,
-            anchor_x="center",
-            anchor_y="center"
+            font_name="Consolas",
+            font_size=16,
+            x=50,
+            y=window.height - 80,
+            anchor_x="left",
+            anchor_y="top",
         )
-        text.draw()
+        bg.draw()
+        text1.draw()
+        text2.draw()
+        text3.draw()
     else:
-        window.set_size(700, 250)
-        text = pyglet.text.Label(
-            text="Searching Server in your network...",
-            font_name="Segoe UI",
-            font_size=26,
-            color=(255, 0, 0, 255),
-            x=window.width//2,
-            y=window.height//2,
-            anchor_x="center",
-            anchor_y="center"
+        # Noch kein Server gefunden
+        bg = pyglet.shapes.Rectangle(
+            x=0,
+            y=0,
+            width=window.width,
+            height=window.height,
+            color=(13, 17, 23, 255)
         )
+        chevron = pyglet.text.Label(
+            text=">",
+            font_name="Consolas",
+            font_size=16,
+            x=20,
+            y=window.height - 20,
+            anchor_x="left",
+            anchor_y="top"
+        )
+        text = pyglet.text.Label(
+            text="Searching for Server in your network...",
+            font_name="Consolas",
+            font_size=16,
+            x=50,
+            y=window.height - 20,
+            anchor_x="left",
+            anchor_y="top"
+        )
+        chevron.draw()
+        bg.draw()
         text.draw()
 
 
-def draw_vertical(x, y, images: list[pyglet.image]):
-    imgs = [image.get_transform(rotate=90) for image in images]
+def draw_vertical(x: int, y: int, images: list[pyglet.image]):
+    imgs = [pyglet.sprite.Sprite(image, x, y) for image in images]
 
     for i, img in enumerate(imgs):
-        c = ClickableImage(img, x, y - (card_spacing * i))
-        c.draw()
-        add_if_not_exist(c)
+        img.rotation = 90
+        img.x, img.y = x, y - (card_spacing * i)
+        img.draw()
+        add_if_not_exist(img)
 
 
 def draw_horizontal(x, y, images: list[pyglet.image]):

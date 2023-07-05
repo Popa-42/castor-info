@@ -36,17 +36,16 @@ class Card:
         :param self: Bezieht sich auf die Instanz der Klasse
         :return: Die Farbe der Karte
         """
-        if self.farbe == 0:
-            return "Kreuz"
-        if self.farbe == 1:
-            return "Pik"
-        if self.farbe == 2:
-            return "Herz"
         if self.farbe == 3:
-            return "Karo"
-        if not self.farbe:
-            return ""
-        raise IndexError("Diese Farbe existiert nicht.")
+            return "c"
+        if self.farbe == 2:
+            return "s"
+        if self.farbe == 1:
+            return "h"
+        if self.farbe == 0:
+            return "d"
+        else:
+            return "#"
 
     def value_str(self) -> str:
         """
@@ -58,15 +57,15 @@ class Card:
         if self.wert == 0:
             return "10"
         if self.wert == 1:
-            return "Ass"
+            return "A"
         if self.wert == 10:
-            return "Bube"
+            return "J"
         if self.wert == 11:
-            return "Dame"
+            return "Q"
         if self.wert == 12:
-            return "König"
+            return "K"
         if self.wert == 50:
-            return "Joker"
+            return "1"
         return str(self.wert)
 
 
@@ -118,33 +117,7 @@ class Player:
     def get_hand(self) -> list[str]:
         liste = []
         for c in self.hand:
-            match c.suit_str():
-                case "Kreuz":
-                    farbe = "c"
-                case "Pik":
-                    farbe = "s"
-                case "Herz":
-                    farbe = "h"
-                case "Karo":
-                    farbe = "d"
-                case "":
-                    farbe = "#"
-                case other:
-                    farbe = None
-            match c.value_str():
-                case "Joker":
-                    wert = "1"
-                case "Ass":
-                    wert = "A"
-                case "Bube":
-                    wert = "J"
-                case "Dame":
-                    wert = "Q"
-                case "König":
-                    wert = "K"
-                case other:
-                    wert = c.value_str()
-            liste.append(farbe + wert)
+            liste.append(c.suit_str() + c.value_str())
         return liste
 
 
@@ -169,7 +142,7 @@ class Game:
         self.deck: list[Card, ...] = [Card(farbe=s, wert=v) for s in range(4) for v in range(13)]
         self.deck += [Card(None, 50), Card(None, 50)]
         shuffle(self.deck)
-        # Erstelle einen Ablagestapel
+        # Erstelle einen Ablagestapel; 0: Oberste Karte
         self.ablage: list[Card, ...] = []
         # Erstelle die Player
         self.players = [Player(nummer=i + 1) for i in range(spielerzahl)]
@@ -266,3 +239,6 @@ class Game:
     def player_throws_card_at(self, player_index: int, index: int):
         card = self.players[player_index].play_card_at_index(index)
         self.throw_card_to_ablage(card)
+
+    def get_oberste_ablage(self) -> Card:
+        return self.ablage[0]
